@@ -7,13 +7,19 @@
   "main": "dist/index.js",
   "repository": {
     "type": "git",
-    "url":  "https://github.com/JanSzewczyk/gh-action-szum-tech.git"
+    "url": "https://github.com/JanSzewczyk/gh-action-szum-tech.git"
   },
   "author": "Jan Szewczyk (Szum-Tech)",
   "license": "MIT",
-  "dependencies": {
+  "devDependencies": {
+    "@types/dedent": "^0.7.0",
     "@types/node": "^17.0.39",
     "typescript": "^4.7.3"
+  },
+  "dependencies": {
+    "@actions/core": "^1.8.2",
+    "@actions/github": "^5.0.3",
+    "dedent": "^0.7.0"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json"

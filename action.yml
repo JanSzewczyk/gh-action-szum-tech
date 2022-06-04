@@ -2,6 +2,17 @@ name: Some action
 author: Jan Szewczyk (Szum-Tech)
 description: Custom GitHub action created with TypeScript
 
+inputs:
+  name:
+    description: Name to greet
+    required: false
+    default: Unknown user
+
+  GITHUB_TOKEN:
+    description: GitHub access token
+    required: true
+
+
 runs:
   using: node16
   main: dist/index.js

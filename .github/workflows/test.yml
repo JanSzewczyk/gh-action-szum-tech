@@ -29,3 +29,6 @@ jobs:
 
       - name: Run my action
         uses: ./
+        with:
+          name: GH user
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
