@@ -4,4 +4,4 @@ description: Custom GitHub action created with TypeScript
 
 runs:
   using: node16
-  main: disc/index.js
+  main: dist/index.js
