@@ -1,0 +1,7 @@
+name: Some action
+author: Jan Szewczyk (Szum-Tech)
+description: Custom GitHub action created with TypeScript
+
+runs:
+  using: node16
+  main: disc/index.js
