@@ -28,4 +28,4 @@ jobs:
         run: yarn run build
 
       - name: Run my action
-        uses: ./
+        uses: './'
