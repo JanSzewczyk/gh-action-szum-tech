@@ -86,14 +86,20 @@ export async function main(githubToken: string) {
                         issue_number: pullRequest.number,
                         labels: ['yaml'],
                     });
-                case 'yaml':
+                case 'yaml': {
                     await octokit.rest.issues.addLabels({
                         ...context.repo,
                         issue_number: pullRequest.number,
                         labels: ['yaml'],
                     });
+                }
             }
         }
+
+        /**
+         * Remove existed
+         */
+        // TODO add remove orr update comment
 
         /**
          * Create a comment on the PR with the information we compiled from the
@@ -109,6 +115,7 @@ export async function main(githubToken: string) {
         - ${diffData.deletions} deletions \n
       `
         });
+
     } catch (error: any) {
         setFailed(error.message);
     }
