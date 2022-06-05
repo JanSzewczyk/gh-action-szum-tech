@@ -8,6 +8,11 @@ on:
     branches:
       - main
 
+permissions:
+  issues: write
+  pull-requests: write
+
+
 jobs:
   run-action:
     name: Run action
