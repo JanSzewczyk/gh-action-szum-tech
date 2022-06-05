@@ -74,10 +74,10 @@ async function getPreviousPRComments() {
 
         const octokit = getOctokit(githubToken);
 
-        const result = await octokit.rest.pulls.listReviews({
+        const result = await octokit.rest.issues.listComments({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            pull_number: pullRequest.number,
+            issue_number: pullRequest.number
         });
 
         console.log('jestem to', result)
