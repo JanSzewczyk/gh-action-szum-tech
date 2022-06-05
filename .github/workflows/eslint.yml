@@ -1,0 +1,63 @@
+name: 🧹 ESLint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "37 21 * * 3"
+
+jobs:
+  check:
+    name: 🧹 Eslint check
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        node-version: [16.x]
+        os: [ubuntu-latest]
+
+    steps:
+      - name: Checkout code 📚
+        uses: actions/checkout@v3
+
+      - name: Install ESLint ⚙️
+        run: |
+          yarn add eslint
+          yarn add @microsoft/eslint-formatter-sarif
+
+      - name: Run ESLint
+        run: yarn eslint "{**/*,*}.{js,ts}"
+          --config .eslintrc.yml
+          --max-warnings 0
+
+  analyse:
+    name: 🧹 Eslint analyse
+    runs-on: ubuntu-latest
+    if: ${{ always() && needs.check.result == 'failure' }}
+    needs: [check]
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout code 📚
+        uses: actions/checkout@v3
+
+      - name: Install ESLint ⚙️
+        run: |
+          yarn add eslint
+          yarn add @microsoft/eslint-formatter-sarif
+
+      - name: Run ESLint
+        run: yarn eslint "{**/*,*}.{js,ts}"
+          --config .eslintrc.yml
+          --max-warnings 0
+          --format @microsoft/eslint-formatter-sarif
+          --output-file eslint-results.sarif
+        continue-on-error: true
+
+      - name: Upload analysis results to GitHub
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: eslint-results.sarif
+          wait-for-processing: true
