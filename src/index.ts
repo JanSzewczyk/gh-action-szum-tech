@@ -1,13 +1,15 @@
 import {getInput} from '@actions/core'
 import {context, getOctokit} from '@actions/github'
-import dedent from "dedent";
+import {main as runLabel} from './label'
+import {GithubContext, GithubContextPayloadPullRequest} from "./types";
 
-type GithubContext = typeof context;
 
 const inputName = getInput('name');
 const githubToken = getInput('GITHUB_TOKEN');
 
 greet(inputName, getRepositoryUrl(context))
+
+runLabel(githubToken);
 
 getDiff().then(res => {
     // console.log(dedent(`
@@ -66,7 +68,7 @@ async function getDiff() {
 }
 
 async function getPreviousPRComments() {
-    const pullRequest: GithubContext['payload']['pull_request'] = context.payload.pull_request;
+    const pullRequest: GithubContextPayloadPullRequest = context.payload.pull_request;
 
     if (pullRequest) {
 
