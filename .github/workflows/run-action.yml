@@ -9,8 +9,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        node-version: [ 16.x ]
-        os: [ ubuntu-latest ]
+        node-version: [16.x]
+        os: [ubuntu-latest]
 
     steps:
       - name: Checkout code 📚
@@ -34,7 +34,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-latest ]
+        os: [ubuntu-latest]
 
     steps:
       - name: Checkout code 📚
