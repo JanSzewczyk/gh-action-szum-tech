@@ -1,0 +1,47 @@
+name: Run Action
+
+on:
+  pull_request:
+
+jobs:
+  build:
+    name: Build 🏗️  ️
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        node-version: [ 16.x ]
+        os: [ ubuntu-latest, windows-latest ]
+
+    steps:
+      - name: Checkout code 📚
+        uses: actions/checkout@v3
+
+      - name: Set up Node 🟢
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install packages ⚙️
+        run: yarn install --frozen-lockfile
+
+      - name: Build 🏗️  ️
+        run: |
+          yarn run build
+          yarn run package
+
+  run-test:
+    name: Run action ▶️
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest ]
+
+    steps:
+      - name: Checkout code 📚
+        uses: actions/checkout@v3
+
+      - name: Run my action ▶️
+        uses: ./
+        with:
+          name: GH user
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

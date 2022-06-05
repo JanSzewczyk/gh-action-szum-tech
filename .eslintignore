@@ -1,0 +1,10 @@
+# dependencies
+.vscode/
+.idea/
+node_modules/
+docs/
+dist/
+lib/
+
+yarn.lock
+jest.config.js
