@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         node-version: [ 16.x ]
-        os: [ ubuntu-latest, windows-latest ]
+        os: [ ubuntu-latest ]
 
     steps:
       - name: Checkout code 📚
@@ -34,7 +34,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest ]
+        os: [ ubuntu-latest ]
 
     steps:
       - name: Checkout code 📚

@@ -5,10 +5,9 @@ plugins:
 extends: ["plugin:github/recommended"]
 parser: "@typescript-eslint/parser"
 parserOptions:
-  ecmaVersion: 9
+  ecmaVersion: 2019
   sourceType: "module"
-  project:
-    - "./tsconfig.json"
+  project: "./tsconfig.json"
 rules:
   "i18n-text/no-en": "off"
   "eslint-comments/no-use": "off"
