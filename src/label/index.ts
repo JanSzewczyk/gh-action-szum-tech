@@ -86,12 +86,13 @@ export async function main(githubToken: string) {
                         issue_number: pullRequest.number,
                         labels: ['yaml'],
                     });
-                case 'yaml':
+                case 'yaml': {
                     await octokit.rest.issues.addLabels({
                         ...context.repo,
                         issue_number: pullRequest.number,
                         labels: ['yaml'],
                     });
+                }
             }
         }
 
