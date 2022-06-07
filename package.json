@@ -11,6 +11,7 @@
   "author": "Jan Szewczyk (Szum-Tech)",
   "license": "MIT",
   "devDependencies": {
+    "@octokit/types": "^6.34.0",
     "@types/dedent": "^0.7.0",
     "@types/node": "^17.0.39",
     "@typescript-eslint/parser": "^5.27.1",

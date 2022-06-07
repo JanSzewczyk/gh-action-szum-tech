@@ -1,21 +1,29 @@
-import { getOctokit, context } from "@actions/github";
+import * as github from "@actions/github";
 import * as core from "@actions/core";
 import { GithubContextPayloadPullRequest } from "../types";
+// import { getInput } from "@actions/core";
+import { getPullRequestFiles } from "../services/pull";
 
 export async function main(githubToken: string): Promise<void> {
   try {
-    const octokit = getOctokit(githubToken);
-    const pullRequest: GithubContextPayloadPullRequest = context.payload.pull_request;
+    // const githubToken = getInput("GITHUB_TOKEN", { required: true });
+
+    const pullRequest: GithubContextPayloadPullRequest = github.context.payload.pull_request;
 
     if (!pullRequest) {
-      new Error("Pull Request doesn't exists!!!");
+      new Error("Could not get pull request number from context, exiting");
       return;
     }
 
-    const { data: changedFiles } = await octokit.rest.pulls.listFiles({
-      ...context.repo,
-      pull_number: pullRequest.number
-    });
+    if (github.context.eventName !== "pull_request") {
+      core.info("Comment only will be created on pull requests!");
+      return;
+    }
+
+    const octokit = github.getOctokit(githubToken);
+
+    const changedFiles = await getPullRequestFiles(octokit, pullRequest.number);
+    core.info(`Changed files: [${changedFiles.map((file) => file.filename).join(" ,")}]`);
 
     let diffData = {
       additions: 0,
@@ -43,7 +51,7 @@ export async function main(githubToken: string): Promise<void> {
       switch (fileExtension) {
         case "md": {
           await octokit.rest.issues.addLabels({
-            ...context.repo,
+            ...github.context.repo,
             issue_number: pullRequest.number,
             labels: ["markdown"]
           });
@@ -51,7 +59,7 @@ export async function main(githubToken: string): Promise<void> {
         }
         case "js": {
           await octokit.rest.issues.addLabels({
-            ...context.repo,
+            ...github.context.repo,
             issue_number: pullRequest.number,
             labels: ["javascript"]
           });
@@ -59,7 +67,7 @@ export async function main(githubToken: string): Promise<void> {
         }
         case "yml": {
           await octokit.rest.issues.addLabels({
-            ...context.repo,
+            ...github.context.repo,
             issue_number: pullRequest.number,
             labels: ["yaml"]
           });
@@ -67,7 +75,7 @@ export async function main(githubToken: string): Promise<void> {
         }
         case "yaml": {
           await octokit.rest.issues.addLabels({
-            ...context.repo,
+            ...github.context.repo,
             issue_number: pullRequest.number,
             labels: ["yaml"]
           });
@@ -85,7 +93,7 @@ export async function main(githubToken: string): Promise<void> {
      * list of changed files.
      */
     await octokit.rest.issues.createComment({
-      ...context.repo,
+      ...github.context.repo,
       issue_number: pullRequest.number,
       body: `
         Pull Request #${pullRequest.number} has been updated with: \n
@@ -95,6 +103,9 @@ export async function main(githubToken: string): Promise<void> {
       `
     });
   } catch (error) {
-    if (error instanceof Error) core.setFailed(error.message);
+    if (error instanceof Error) {
+      core.error(error);
+      core.setFailed(error.message);
+    }
   }
 }
