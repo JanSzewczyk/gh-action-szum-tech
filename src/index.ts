@@ -1,37 +1,32 @@
-/* eslint-disable no-console */
-import { context } from "@actions/github";
 // import { getInput } from "@actions/core";
-// import { main as runLabel } from "./label";
+import { main as runLabel } from "./label";
 
 // const inputName = getInput("name");
 // const githubToken = getInput("GITHUB_TOKEN");
 
 // greet(inputName, getRepositoryUrl(context));
 
-// eslint-disable-next-line github/no-then
-// runLabel(githubToken).then(() => {
-//   console.log("xxxx");
-// });
+runLabel();
 
 // getPreviousPRComments().then(() => {
 //   // console.log("comments", JSON.stringify(res, undefined, 2));
 // });
 
-console.log("--- Action Info ---");
-console.log("eventName:", context.eventName);
-console.log("sha:", context.sha);
-console.log("ref:", context.ref);
-console.log("workflow:", context.workflow);
-console.log("action:", context.action);
-console.log("actor:", context.actor);
-console.log("job:", context.job);
-console.log("runNumber:", context.runNumber);
-console.log("runId:", context.runId);
-console.log("apiUrl:", context.apiUrl);
-console.log("serverUrl:", context.serverUrl);
-console.log("graphqlUrl:", context.graphqlUrl);
-console.log("-------------------");
-//
+// console.log("--- Action Info ---");
+// console.log("eventName:", context.eventName);
+// console.log("sha:", context.sha);
+// console.log("ref:", context.ref);
+// console.log("workflow:", context.workflow);
+// console.log("action:", context.action);
+// console.log("actor:", context.actor);
+// console.log("job:", context.job);
+// console.log("runNumber:", context.runNumber);
+// console.log("runId:", context.runId);
+// console.log("apiUrl:", context.apiUrl);
+// console.log("serverUrl:", context.serverUrl);
+// console.log("graphqlUrl:", context.graphqlUrl);
+// console.log("-------------------");
+// //
 // console.log("--- Payload ---");
 // console.log(JSON.stringify(context.payload.action, undefined, 2));
 // console.log("---------------");

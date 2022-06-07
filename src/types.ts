@@ -10,5 +10,7 @@ export type OctokitClient = ReturnType<typeof getOctokit>;
 export type IssueComment =
   types.Endpoints["GET /repos/{owner}/{repo}/issues/comments/{comment_id}"]["response"]["data"];
 
+export type Label = types.Endpoints["GET /repos/{owner}/{repo}/labels"]["response"]["data"][0];
+
 export type PullRequestFile =
   types.Endpoints["GET /repos/{owner}/{repo}/pulls/{pull_number}/files"]["response"]["data"][0];
