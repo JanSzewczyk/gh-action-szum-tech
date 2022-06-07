@@ -9,8 +9,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        node-version: [ 16.x ]
-        os: [ ubuntu-latest ]
+        node-version: [16.x]
+        os: [ubuntu-latest]
 
     steps:
       - name: Checkout code 📚
@@ -34,20 +34,19 @@ jobs:
         with:
           name: GH user
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-
-  run-test:
-    name: Run action ▶️
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ ubuntu-latest ]
-
-    steps:
-      - name: Checkout code 📚
-        uses: actions/checkout@v3
-
-      - name: Run my action ▶️
-        uses: ./
-        with:
-          name: GH user
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+#  run-test:
+#    name: Run action ▶️
+#    runs-on: ${{ matrix.os }}
+#    strategy:
+#      matrix:
+#        os: [ ubuntu-latest ]
+#
+#    steps:
+#      - name: Checkout code 📚
+#        uses: actions/checkout@v3
+#
+#      - name: Run my action ▶️
+#        uses: ./
+#        with:
+#          name: GH user
+#          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
