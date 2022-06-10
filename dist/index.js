@@ -1,101 +1,22 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 4822:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+/***/ 784:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core_1 = __nccwpck_require__(2186);
-const github_1 = __nccwpck_require__(5438);
-const label_1 = __nccwpck_require__(1141);
-// const inputName = getInput("name");
-const githubToken = (0, core_1.getInput)("GITHUB_TOKEN");
-// greet(inputName, getRepositoryUrl(context));
-(0, label_1.main)();
-// eslint-disable-next-line github/no-then
-getDiff().then(() => {
-    // console.log(dedent(`
-    //     Your PR diff:
-    //     ${JSON.stringify(res, undefined, 2 )}
-    // `))
-});
-// eslint-disable-next-line github/no-then
-getPreviousPRComments().then(() => {
-    // console.log("comments", JSON.stringify(res, undefined, 2));
-});
-// console.log("--- Action Info ---");
-// console.log("eventName:", context.eventName);
-// console.log("sha:", context.sha);
-// console.log("ref:", context.ref);
-// console.log("workflow:", context.workflow);
-// console.log("action:", context.action);
-// console.log("actor:", context.actor);
-// console.log("job:", context.job);
-// console.log("runNumber:", context.runNumber);
-// console.log("runId:", context.runId);
-// console.log("apiUrl:", context.apiUrl);
-// console.log("serverUrl:", context.serverUrl);
-// console.log("graphqlUrl:", context.graphqlUrl);
-// console.log("-------------------");
-//
-// console.log("--- Payload ---");
-// console.log(JSON.stringify(context.payload.action, undefined, 2));
-// console.log("---------------");
-// console.log(JSON.stringify(context.payload.comment, undefined, 2));
-// console.log("---------------");
-// console.log(JSON.stringify(context.payload.pull_request, undefined, 2));
-// console.log("---------------");
-//
-// function greet(): void {
-//   // console.log(`Hello ${name}!! You are running a GH action in ${repoUrl}`);
-// }
-//
-// function getRepositoryUrl({ repo, serverUrl }: GithubContext): string {
-//   return `${serverUrl}/${repo.owner}/${repo.repo}`;
-// }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getDiff() {
-    var _a, _b;
-    return __awaiter(this, void 0, void 0, function* () {
-        const octokit = (0, github_1.getOctokit)(githubToken);
-        const result = yield octokit.rest.repos.compareCommits({
-            repo: github_1.context.repo.repo,
-            owner: github_1.context.repo.owner,
-            head: (_a = github_1.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.head.sha,
-            base: (_b = github_1.context.payload.pull_request) === null || _b === void 0 ? void 0 : _b.base.sha,
-            per_page: 100
-        });
-        return result.data.files || [];
-    });
-}
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getPreviousPRComments() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const pullRequest = github_1.context.payload.pull_request;
-        if (pullRequest) {
-            const octokit = (0, github_1.getOctokit)(githubToken);
-            const result = yield octokit.rest.issues.listComments({
-                owner: github_1.context.repo.owner,
-                repo: github_1.context.repo.repo,
-                issue_number: pullRequest.number
-            });
-            // console.log("jestem to", result);
-            return result.data;
-        }
-        return [];
-    });
-}
+exports.allLabelsNames = exports.pullRequestSizeLabelNames = void 0;
+const types_1 = __nccwpck_require__(8152);
+exports.pullRequestSizeLabelNames = [
+    types_1.PullRequestSizeLabel.SMALL,
+    types_1.PullRequestSizeLabel.MEDIUM,
+    types_1.PullRequestSizeLabel.LARGE,
+    types_1.PullRequestSizeLabel.X_LARGE,
+    types_1.PullRequestSizeLabel.MEGALODON
+];
+exports.allLabelsNames = [...exports.pullRequestSizeLabelNames];
 
 
 /***/ }),
@@ -138,73 +59,59 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.main = void 0;
+exports.getLabelsDifferences = exports.main = void 0;
 const github = __importStar(__nccwpck_require__(5438));
 const core = __importStar(__nccwpck_require__(2186));
 const core_1 = __nccwpck_require__(2186);
+const pull_1 = __nccwpck_require__(7551);
+const label_1 = __nccwpck_require__(7156);
+const constants_1 = __nccwpck_require__(784);
+const labels_config_1 = __nccwpck_require__(1163);
+const pull_request_size_1 = __nccwpck_require__(7806);
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const githubToken = (0, core_1.getInput)("GITHUB_TOKEN", { required: true });
             const pullRequest = github.context.payload.pull_request;
             if (!pullRequest) {
-                new Error("Could not get pull request number from context, exiting");
+                core.warning("Could not get pull request number from context, exiting");
+                return;
+            }
+            if (github.context.eventName !== "pull_request") {
+                core.warning("Comment only will be created on pull requests!");
                 return;
             }
             const octokit = github.getOctokit(githubToken);
-            const { data: changedFiles } = yield octokit.rest.pulls.listFiles(Object.assign(Object.assign({}, github.context.repo), { pull_number: pullRequest.number }));
-            let diffData = {
-                additions: 0,
-                deletions: 0,
-                changes: 0
-            };
-            diffData = changedFiles.reduce((acc, file) => {
-                acc.additions += file.additions;
-                acc.deletions += file.deletions;
-                acc.changes += file.changes;
-                return acc;
-            }, diffData);
-            /**
-             * Loop over all the files changed in the PR and add labels according
-             * to files types.
-             **/
-            for (const file of changedFiles) {
-                /**
-                 * Add labels according to file types.
-                 */
-                const fileExtension = file.filename.split(".").pop();
-                switch (fileExtension) {
-                    case "md": {
-                        yield octokit.rest.issues.addLabels(Object.assign(Object.assign({}, github.context.repo), { issue_number: pullRequest.number, labels: ["markdown"] }));
-                        break;
-                    }
-                    case "js": {
-                        yield octokit.rest.issues.addLabels(Object.assign(Object.assign({}, github.context.repo), { issue_number: pullRequest.number, labels: ["javascript"] }));
-                        break;
-                    }
-                    case "yml": {
-                        yield octokit.rest.issues.addLabels(Object.assign(Object.assign({}, github.context.repo), { issue_number: pullRequest.number, labels: ["yaml"] }));
-                        break;
-                    }
-                    case "yaml": {
-                        yield octokit.rest.issues.addLabels(Object.assign(Object.assign({}, github.context.repo), { issue_number: pullRequest.number, labels: ["yaml"] }));
-                    }
+            yield checkRepositoryLabels(octokit);
+            const changedFiles = yield (0, pull_1.getPullRequestFiles)(octokit, pullRequest.number);
+            const detectedLabels = [];
+            const sizeLabel = (0, pull_request_size_1.getPullRequestSizeLabel)(changedFiles);
+            detectedLabels.push(sizeLabel);
+            core.info(`\nDefined labels:`);
+            detectedLabels.forEach((detectedLabel, index) => {
+                core.info(`[${index + 1}/${detectedLabels.length}]\t [${detectedLabel}]`);
+            });
+            const pullRequestLabels = yield (0, label_1.listLabelsForPullRequest)(octokit, pullRequest.number);
+            const differences = getLabelsDifferences(pullRequestLabels.map((label) => label.name), detectedLabels, [...constants_1.allLabelsNames]);
+            if (differences.remove.length) {
+                core.info("\nRemoving labels from pull request...");
+                for (const labelToRemove of differences.remove) {
+                    const index = differences.remove.indexOf(labelToRemove);
+                    yield (0, label_1.removeLabelFromPullRequest)(octokit, pullRequest.number, labelToRemove);
+                    core.info(`[${index + 1}/${differences.remove.length}]\tRemoved label: ${labelToRemove}`);
                 }
             }
-            /**
-             * Remove existed
-             */
-            // TODO add remove orr update comment
-            /**
-             * Create a comment on the PR with the information we compiled from the
-             * list of changed files.
-             */
-            yield octokit.rest.issues.createComment(Object.assign(Object.assign({}, github.context.repo), { issue_number: pullRequest.number, body: `
-        Pull Request #${pullRequest.number} has been updated with: \n
-        - ${diffData.changes} changes \n
-        - ${diffData.additions} additions \n
-        - ${diffData.deletions} deletions \n
-      ` }));
+            if (differences.add.length) {
+                core.info("\nAdding labels to pull request...");
+                yield (0, label_1.addLabelsToPullRequest)(octokit, pullRequest.number, detectedLabels);
+                for (const labelToAdd of differences.add) {
+                    const index = differences.add.indexOf(labelToAdd);
+                    core.info(`[${index + 1}/${differences.add.length}]\tAdded label: ${labelToAdd}`);
+                }
+            }
+            if (!differences.add.length && !differences.remove.length) {
+                core.info("\nAll pull request labels are up to date");
+            }
         }
         catch (error) {
             if (error instanceof Error) {
@@ -215,6 +122,338 @@ function main() {
     });
 }
 exports.main = main;
+function checkRepositoryLabels(client) {
+    return __awaiter(this, void 0, void 0, function* () {
+        core.info("Checking Repository Labels...");
+        const repoLabels = yield (0, label_1.listLabelsForRepository)(client);
+        const labelsToAdd = [...constants_1.allLabelsNames];
+        const labelsToUpdate = [];
+        let foundLabelCount = 0;
+        repoLabels.forEach((label) => {
+            const labelName = label.name;
+            if (constants_1.allLabelsNames.includes(labelName) && !label.default) {
+                core.info(`[${foundLabelCount + 1}/${constants_1.allLabelsNames.length}]\tA supported label was found: [${label.name}]`);
+                foundLabelCount = foundLabelCount + 1;
+                if (!validateLabelWithConfiguration(label, labels_config_1.labelsConfig[labelName])) {
+                    labelsToUpdate.push(labelName);
+                }
+                labelsToAdd.splice(labelsToAdd.indexOf(labelName), 1);
+            }
+        });
+        if (labelsToUpdate.length) {
+            core.info("\nUpdating repository labels...");
+            for (const labelToUpdate of labelsToUpdate) {
+                const index = labelsToUpdate.indexOf(labelToUpdate);
+                yield (0, label_1.updateLabel)(client, labels_config_1.labelsConfig[labelToUpdate]);
+                core.info(`[${index + 1}/${labelsToUpdate.length}]\tUpdated label: ${labelToUpdate}`);
+            }
+        }
+        if (labelsToAdd.length) {
+            core.info("\nCreating repository labels...");
+            for (const labelToAdd of labelsToAdd) {
+                const index = labelsToAdd.indexOf(labelToAdd);
+                yield (0, label_1.createLabel)(client, labels_config_1.labelsConfig[labelToAdd]);
+                core.info(`[${index + 1}/${labelsToAdd.length}]\tCreate label: ${labelToAdd}`);
+            }
+        }
+        if (!labelsToAdd.length && !labelsToUpdate.length) {
+            core.info("All labels are up to date");
+        }
+    });
+}
+function validateLabelWithConfiguration(label, labelConfiguration) {
+    return (label.name === labelConfiguration.name &&
+        label.color === labelConfiguration.color &&
+        label.description === labelConfiguration.description);
+}
+function getLabelsDifferences(pullRequestLabels, labels, allLabels) {
+    core.info("\nGetting differences...");
+    labels = labels.filter((label) => allLabels.includes(label));
+    const pullRequestSupportedLabels = pullRequestLabels.filter((prLabel) => allLabels.includes(prLabel));
+    return {
+        add: labels.filter((label) => !pullRequestSupportedLabels.includes(label)),
+        remove: pullRequestSupportedLabels.filter((label) => !labels.includes(label))
+    };
+}
+exports.getLabelsDifferences = getLabelsDifferences;
+
+
+/***/ }),
+
+/***/ 1163:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.labelsConfig = void 0;
+const types_1 = __nccwpck_require__(8152);
+exports.labelsConfig = {
+    [types_1.PullRequestSizeLabel.SMALL]: {
+        color: "4CAF50",
+        description: "Small size of pull request, up to 32 lines.",
+        name: types_1.PullRequestSizeLabel.SMALL
+    },
+    [types_1.PullRequestSizeLabel.MEDIUM]: {
+        color: "FFEB3B",
+        description: "Medium size of pull request, from 32 to 128 lines.",
+        name: types_1.PullRequestSizeLabel.MEDIUM
+    },
+    [types_1.PullRequestSizeLabel.LARGE]: {
+        color: "FFC107",
+        description: "Large size of pull request, from 128 to 512 lines.",
+        name: types_1.PullRequestSizeLabel.LARGE
+    },
+    [types_1.PullRequestSizeLabel.X_LARGE]: {
+        color: "FF5722",
+        description: "X_Large size of pull request, from 512 to 1024 lines.",
+        name: types_1.PullRequestSizeLabel.X_LARGE
+    },
+    [types_1.PullRequestSizeLabel.MEGALODON]: {
+        color: "F44336",
+        description: "Pull request in MEGALODON size, over 1024 lines.",
+        name: types_1.PullRequestSizeLabel.MEGALODON
+    }
+};
+
+
+/***/ }),
+
+/***/ 7806:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getSizeLabel = exports.getPullRequestChangesReport = exports.filterFileNames = exports.getPullRequestSizeLabel = void 0;
+const types_1 = __nccwpck_require__(8152);
+const core = __importStar(__nccwpck_require__(2186));
+const ignoredFiles = ["yarn.lock", "package-lock.json"];
+const ignoredDirectory = ["lib/", "dist/"];
+function getPullRequestSizeLabel(changedFiles) {
+    core.info("\nProcessing Pull Request Changes Report...");
+    const fileNames = changedFiles.map((file) => file.filename);
+    const filteredFileNames = filterFileNames(fileNames);
+    const filteredFiles = changedFiles.filter((file) => filteredFileNames.includes(file.filename));
+    const pullRequestReport = getPullRequestChangesReport(filteredFiles);
+    core.info("Report details:");
+    core.info(`\t* ${filteredFiles.length} file(s)`);
+    core.info(`\t* ${pullRequestReport.additions} addition(s)`);
+    core.info(`\t* ${pullRequestReport.changes} change(s)`);
+    core.info(`\t* ${pullRequestReport.deletions} deletion(s)`);
+    return getSizeLabel(pullRequestReport.changes);
+}
+exports.getPullRequestSizeLabel = getPullRequestSizeLabel;
+function filterFileNames(fileNames) {
+    return fileNames.filter((fileName) => !ignoredFiles.includes(fileName) && ignoredDirectory.every((dirName) => !fileName.startsWith(dirName)));
+}
+exports.filterFileNames = filterFileNames;
+function getPullRequestChangesReport(files) {
+    let pullRequestReport = {
+        additions: 0,
+        changes: 0,
+        deletions: 0
+    };
+    pullRequestReport = files.reduce((acc, file) => {
+        acc.additions += file.additions;
+        acc.changes += file.changes;
+        acc.deletions += file.deletions;
+        return acc;
+    }, pullRequestReport);
+    return pullRequestReport;
+}
+exports.getPullRequestChangesReport = getPullRequestChangesReport;
+function getSizeLabel(changes) {
+    if (changes < 32)
+        return types_1.PullRequestSizeLabel.SMALL;
+    if (changes < 128)
+        return types_1.PullRequestSizeLabel.MEDIUM;
+    if (changes < 512)
+        return types_1.PullRequestSizeLabel.LARGE;
+    if (changes < 1024)
+        return types_1.PullRequestSizeLabel.X_LARGE;
+    return types_1.PullRequestSizeLabel.MEGALODON;
+}
+exports.getSizeLabel = getSizeLabel;
+
+
+/***/ }),
+
+/***/ 8152:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ChangedFileLabel = exports.PullRequestSizeLabel = void 0;
+var PullRequestSizeLabel;
+(function (PullRequestSizeLabel) {
+    PullRequestSizeLabel["SMALL"] = "small";
+    PullRequestSizeLabel["MEDIUM"] = "medium";
+    PullRequestSizeLabel["LARGE"] = "large";
+    PullRequestSizeLabel["X_LARGE"] = "x_large";
+    PullRequestSizeLabel["MEGALODON"] = "megalodon";
+})(PullRequestSizeLabel = exports.PullRequestSizeLabel || (exports.PullRequestSizeLabel = {}));
+var ChangedFileLabel;
+(function (ChangedFileLabel) {
+    ChangedFileLabel["CONFIGURATION"] = "configuration";
+})(ChangedFileLabel = exports.ChangedFileLabel || (exports.ChangedFileLabel = {}));
+
+
+/***/ }),
+
+/***/ 7156:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.removeLabelFromPullRequest = exports.addLabelsToPullRequest = exports.updateLabel = exports.createLabel = exports.listLabelsForPullRequest = exports.listLabelsForRepository = void 0;
+const github = __importStar(__nccwpck_require__(5438));
+function listLabelsForRepository(client) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { data: repoLabels } = yield client.rest.issues.listLabelsForRepo(Object.assign({}, github.context.repo));
+        return repoLabels;
+    });
+}
+exports.listLabelsForRepository = listLabelsForRepository;
+function listLabelsForPullRequest(client, pullRequestNumber) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { data: repoLabels } = yield client.rest.issues.listLabelsOnIssue(Object.assign(Object.assign({}, github.context.repo), { issue_number: pullRequestNumber }));
+        return repoLabels;
+    });
+}
+exports.listLabelsForPullRequest = listLabelsForPullRequest;
+function createLabel(client, labelConfig) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield client.rest.issues.createLabel(Object.assign(Object.assign({}, github.context.repo), labelConfig));
+    });
+}
+exports.createLabel = createLabel;
+function updateLabel(client, labelConfig) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield client.rest.issues.updateLabel(Object.assign(Object.assign({}, github.context.repo), labelConfig));
+    });
+}
+exports.updateLabel = updateLabel;
+function addLabelsToPullRequest(client, pullRequestNumber, labels) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield client.rest.issues.addLabels(Object.assign(Object.assign({}, github.context.repo), { issue_number: pullRequestNumber, labels }));
+    });
+}
+exports.addLabelsToPullRequest = addLabelsToPullRequest;
+function removeLabelFromPullRequest(client, pullRequestNumber, label) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield client.rest.issues.removeLabel(Object.assign(Object.assign({}, github.context.repo), { issue_number: pullRequestNumber, name: label }));
+    });
+}
+exports.removeLabelFromPullRequest = removeLabelFromPullRequest;
+
+
+/***/ }),
+
+/***/ 7551:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getPullRequestFiles = void 0;
+const github = __importStar(__nccwpck_require__(5438));
+function getPullRequestFiles(client, pullRequestNumber) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { data: changedFiles } = yield client.rest.pulls.listFiles(Object.assign(Object.assign({}, github.context.repo), { pull_number: pullRequestNumber }));
+        return changedFiles;
+    });
+}
+exports.getPullRequestFiles = getPullRequestFiles;
 
 
 /***/ }),
@@ -9075,13 +9314,88 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(4822);
-/******/ 	module.exports = __webpack_exports__;
-/******/ 	
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+(() => {
+"use strict";
+var exports = __webpack_exports__;
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+// import { getInput } from "@actions/core";
+const label_1 = __nccwpck_require__(1141);
+// const inputName = getInput("name");
+// const githubToken = getInput("GITHUB_TOKEN");
+// greet(inputName, getRepositoryUrl(context));
+(0, label_1.main)();
+// getPreviousPRComments().then(() => {
+//   // console.log("comments", JSON.stringify(res, undefined, 2));
+// });
+// console.log("--- Action Info ---");
+// console.log("eventName:", context.eventName);
+// console.log("sha:", context.sha);
+// console.log("ref:", context.ref);
+// console.log("workflow:", context.workflow);
+// console.log("action:", context.action);
+// console.log("actor:", context.actor);
+// console.log("job:", context.job);
+// console.log("runNumber:", context.runNumber);
+// console.log("runId:", context.runId);
+// console.log("apiUrl:", context.apiUrl);
+// console.log("serverUrl:", context.serverUrl);
+// console.log("graphqlUrl:", context.graphqlUrl);
+// console.log("-------------------");
+// //
+// console.log("--- Payload ---");
+// console.log(JSON.stringify(context.payload.action, undefined, 2));
+// console.log("---------------");
+// console.log(JSON.stringify(context.payload.comment, undefined, 2));
+// console.log("---------------");
+// console.log(JSON.stringify(context.payload.pull_request, undefined, 2));
+// console.log("---------------");
+//
+// //L
+// // function getRepositoryUrl({ repo, serverUrl }: GithubContext): string {
+// //   return `${serverUrl}/${repo.owner}/${repo.repo}`;
+// // }
+//
+// // eslint-disable-next-line @typescript-eslint/no-explicit-any
+// async function getDiff(): Promise<any[]> {
+//   const octokit = getOctokit(githubToken);
+//
+//   const result = await octokit.rest.repos.compareCommits({
+//     repo: context.repo.repo,
+//     owner: context.repo.owner,
+//     head: context.payload.pull_request?.head.sha,
+//     base: context.payload.pull_request?.base.sha,
+//     per_page: 100
+//   });
+//
+//   return result.data.files || [];
+// }
+//
+// // eslint-disable-next-line @typescript-eslint/no-explicit-any
+// async function getPreviousPRComments(): Promise<any[]> {
+//   const pullRequest: GithubContextPayloadPullRequest = context.payload.pull_request;
+//
+//   if (pullRequest) {
+//     const octokit = getOctokit(githubToken);
+//
+//     const result = await octokit.rest.issues.listComments({
+//       owner: context.repo.owner,
+//       repo: context.repo.repo,
+//       issue_number: pullRequest.number
+//     });
+//
+//     // console.log("jestem to", result);
+//     return result.data;
+//   }
+//
+//   return [];
+// }
+
+})();
+
+module.exports = __webpack_exports__;
 /******/ })()
 ;
 //# sourceMappingURL=index.js.map
