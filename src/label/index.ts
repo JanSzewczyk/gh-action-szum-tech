@@ -32,6 +32,8 @@ export async function main(): Promise<void> {
       return;
     }
 
+    github.context.actor = "dependabot[bot]";
+
     const octokit = github.getOctokit(githubToken);
 
     await checkRepositoryLabels(octokit);
