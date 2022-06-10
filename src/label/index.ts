@@ -32,8 +32,6 @@ export async function main(): Promise<void> {
       return;
     }
 
-    github.context.actor = "dependabot[bot]";
-
     const octokit = github.getOctokit(githubToken);
 
     await checkRepositoryLabels(octokit);
@@ -44,7 +42,7 @@ export async function main(): Promise<void> {
     const sizeLabel = getPullRequestSizeLabel(changedFiles);
     detectedLabels.push(sizeLabel);
 
-    core.info(`\nDefined labels:`);
+    core.info(`\nDetected labels:`);
     detectedLabels.forEach((detectedLabel, index) => {
       core.info(`[${index + 1}/${detectedLabels.length}]\t [${detectedLabel}]`);
     });

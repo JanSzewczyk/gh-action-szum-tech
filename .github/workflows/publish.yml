@@ -1,0 +1,51 @@
+name: "🚀 Publish"
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: 🧪 Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        node-version: [ 14.x, 16.x ]
+        os: [ ubuntu-latest, windows-latest ]
+
+    steps:
+      - name: Checkout code 📚
+        uses: actions/checkout@v3
+
+      - name: Set up Node 🟢
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install packages ⚙️
+        run: yarn install --frozen-lockfile
+
+      - name: Run tests 🧪
+        run: yarn test
+
+  publish:
+    name: 🚀 Publish
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/main' }}
+    needs: [ test ]
+    steps:
+      - name: Checkout code 📚
+        uses: actions/checkout@v3
+
+      - name: Set up Node 🟢
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install packages ⚙️
+        run: yarn install --frozen-lockfile
+
+      - name: Deploy package 🚀
+        run: yarn semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
