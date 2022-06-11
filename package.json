@@ -40,11 +40,11 @@
   },
   "main": "lib/index.js",
   "scripts": {
-    "all": "npm run build && npm run package && npm test",
     "build": "tsc -p tsconfig.build.json",
     "lint": "eslint {**/*,*}.{js,ts}",
     "lint:fix": "eslint --fix {**/*,*}.{js,ts}",
     "package": "ncc build --source-map --license licenses.txt",
+    "prepare-release": "yarn run build && yarn run package",
     "prettier": "prettier .",
     "prettier:write": "prettier --write .",
     "semantic-release": "semantic-release",

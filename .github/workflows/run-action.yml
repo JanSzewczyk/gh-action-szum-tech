@@ -25,9 +25,7 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Build 🏗️  ️
-        run: |
-          yarn run build
-          yarn run package
+        run: yarn run prepare-release
 
       - name: Run my action ▶️
         uses: ./
