@@ -1,6 +1,9 @@
 name: Size Labeler
 author: Jan Szewczyk (Szum-Tech)
 description: Custom GitHub action created with TypeScript
+branding:
+  color: blue
+  icon: activity
 
 inputs:
   name:
