@@ -9,4 +9,4 @@ inputs:
 
 runs:
   using: node16
-  main: ../lib/labels/index.js
+  main: ../dist/labels/index.js
