@@ -1,3 +1,11 @@
+## [1.1.2](https://github.com/JanSzewczyk/gh-action-szum-tech/compare/v1.1.1...v1.1.2) (2022-06-11)
+
+
+### Bug Fixes
+
+* **action:** fix actions ([8f28227](https://github.com/JanSzewczyk/gh-action-szum-tech/commit/8f28227e6d62ddce610a82fa36d0de3266dbca92))
+* **dist:** add `dist` directory to gitignore ([fb9aa68](https://github.com/JanSzewczyk/gh-action-szum-tech/commit/fb9aa68e32d901af48ac60d692b95c4722b0900f))
+
 ## [1.1.1](https://github.com/JanSzewczyk/gh-action-szum-tech/compare/v1.1.0...v1.1.1) (2022-06-11)
 
 
