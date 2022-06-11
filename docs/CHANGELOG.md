@@ -1,3 +1,10 @@
+## [1.1.3](https://github.com/JanSzewczyk/gh-action-szum-tech/compare/v1.1.2...v1.1.3) (2022-06-11)
+
+
+### Bug Fixes
+
+* **release:** fix release publish ([6c67ab1](https://github.com/JanSzewczyk/gh-action-szum-tech/commit/6c67ab1108532c09f56bed81e81f357c40f6d76a))
+
 ## [1.1.2](https://github.com/JanSzewczyk/gh-action-szum-tech/compare/v1.1.1...v1.1.2) (2022-06-11)
 
 
