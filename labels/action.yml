@@ -1,0 +1,12 @@
+name: Labels
+author: Jan Szewczyk (Szum-Tech)
+description: Custom GitHub action created with TypeScript
+
+inputs:
+  GITHUB_TOKEN:
+    description: GitHub access token
+    required: true
+
+runs:
+  using: node16
+  main: ../lib/labels/index.js
