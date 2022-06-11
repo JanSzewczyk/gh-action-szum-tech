@@ -1,20 +1,10 @@
-name: Size Labeler
+name: Github Szumtions
 author: Jan Szewczyk (Szum-Tech)
-description: Custom GitHub action created with TypeScript
+description: Custom GitHub actions created to make your repository great again
 branding:
   color: blue
   icon: activity
 
-inputs:
-  name:
-    description: Name to greet
-    required: false
-    default: Unknown user
-
-  GITHUB_TOKEN:
-    description: GitHub access token
-    required: true
-
 runs:
   using: node16
-  main: dist/index.js
+  main: lib/index.js

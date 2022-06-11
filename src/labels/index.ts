@@ -155,3 +155,5 @@ export function getLabelsDifferences(
     remove: pullRequestSupportedLabels.filter((label) => !labels.includes(label))
   };
 }
+
+main();

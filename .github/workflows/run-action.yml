@@ -27,11 +27,15 @@ jobs:
       - name: Build 🏗️  ️
         run: yarn run prepare-release
 
-      - name: Run my action ▶️
+      - name: Run greetings action ▶️
         uses: ./
+
+      - name: Run labels action ▶️
+        uses: ./labels
         with:
-          name: GH user
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+
 #  run-test:
 #    name: Run action ▶️
 #    runs-on: ${{ matrix.os }}

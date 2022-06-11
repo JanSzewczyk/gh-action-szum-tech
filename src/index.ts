@@ -1,12 +1,16 @@
-// import { getInput } from "@actions/core";
-import { main as runLabel } from "./label";
+import * as core from "@actions/core";
+
+function main(): void {
+  core.info("Greetings users");
+  core.info("\nHave a good hacking!!");
+}
+
+main();
 
 // const inputName = getInput("name");
 // const githubToken = getInput("GITHUB_TOKEN");
 
 // greet(inputName, getRepositoryUrl(context));
-
-runLabel();
 
 // getPreviousPRComments().then(() => {
 //   // console.log("comments", JSON.stringify(res, undefined, 2));

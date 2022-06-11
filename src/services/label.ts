@@ -1,6 +1,6 @@
 import { Label, OctokitClient } from "../types";
 import * as github from "@actions/github";
-import { LabelConfiguration } from "../label/types";
+import { LabelConfiguration } from "../labels/types";
 
 export async function listLabelsForRepository(client: OctokitClient): Promise<Label[]> {
   const { data: repoLabels } = await client.rest.issues.listLabelsForRepo({
