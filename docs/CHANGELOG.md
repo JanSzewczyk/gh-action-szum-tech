@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/JanSzewczyk/gh-action-szum-tech/compare/v1.2.0...v1.2.1) (2022-06-11)
+
+
+### Bug Fixes
+
+* **repo:** fix multi action repo ([01bbcc1](https://github.com/JanSzewczyk/gh-action-szum-tech/commit/01bbcc1593300be6090f3ca1e099beca2604644a))
+
 # [1.2.0](https://github.com/JanSzewczyk/gh-action-szum-tech/compare/v1.1.3...v1.2.0) (2022-06-11)
 
 
