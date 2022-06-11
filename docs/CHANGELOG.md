@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/JanSzewczyk/gh-action-szum-tech/compare/v1.1.3...v1.2.0) (2022-06-11)
+
+
+### Features
+
+* **repo:** Prepare repository to support many actions ([417a2c4](https://github.com/JanSzewczyk/gh-action-szum-tech/commit/417a2c4330d56f94f871a0d2be1a3ab95343c6aa))
+
 ## [1.1.3](https://github.com/JanSzewczyk/gh-action-szum-tech/compare/v1.1.2...v1.1.3) (2022-06-11)
 
 
