@@ -22,14 +22,18 @@ export async function listLabelsForPullRequest(client: OctokitClient, pullReques
 export async function createLabel(client: OctokitClient, labelConfig: LabelConfiguration): Promise<void> {
   await client.rest.issues.createLabel({
     ...github.context.repo,
-    ...labelConfig
+    name: labelConfig.name,
+    color: labelConfig.color,
+    description: labelConfig.description
   });
 }
 
 export async function updateLabel(client: OctokitClient, labelConfig: LabelConfiguration): Promise<void> {
   await client.rest.issues.updateLabel({
     ...github.context.repo,
-    ...labelConfig
+    name: labelConfig.name,
+    color: labelConfig.color,
+    description: labelConfig.description
   });
 }
 

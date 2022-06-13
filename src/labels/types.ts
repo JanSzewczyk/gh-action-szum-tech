@@ -1,7 +1,29 @@
+export interface Configuration {
+  labels: LabelConfiguration[];
+}
+
 export interface LabelConfiguration {
   name: string;
   color: string;
   description?: string;
+  validation?: LabelValidation;
+}
+
+export interface LabelValidation {
+  ignoreFiles?: string[];
+  any?: string[];
+  every?: string[];
+  changes?: LabelSizeValidation;
+  additions?: LabelSizeValidation;
+  deletions?: LabelSizeValidation;
+}
+
+export interface LabelSizeValidation {
+  equal?: number;
+  lessThan?: number;
+  lessOrEqualThan?: number;
+  greaterThan?: number;
+  greaterOrEqualThan?: number;
 }
 
 export interface PullRequestChangesReport {
@@ -10,18 +32,8 @@ export interface PullRequestChangesReport {
   deletions: number;
 }
 
-export type LabelsConfiguration = Record<PullRequestSizeLabel, LabelConfiguration>;
-
-export enum PullRequestSizeLabel {
-  SMALL = "small",
-  MEDIUM = "medium",
-  LARGE = "large",
-  X_LARGE = "x_large",
-  MEGALODON = "megalodon"
+export interface LabelChangesReport {
+  add?: string[];
+  delete?: string[];
+  update?: string[];
 }
-
-export enum ChangedFileLabel {
-  CONFIGURATION = "configuration"
-}
-
-export type LabelsType = PullRequestSizeLabel;
