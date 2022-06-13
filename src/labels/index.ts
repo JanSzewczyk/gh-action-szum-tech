@@ -1,6 +1,7 @@
 import * as github from "@actions/github";
 import * as core from "@actions/core";
-import { GithubContextPayloadPullRequest, Label, OctokitClient } from "../types";
+
+import { GithubContextPayloadPullRequest, OctokitClient } from "../types";
 import { getInput } from "@actions/core";
 import { getPullRequestFiles } from "../services/pull";
 import {
@@ -11,10 +12,10 @@ import {
   removeLabelFromPullRequest,
   updateLabel
 } from "../services/label";
-import { allLabelsNames } from "./constants";
-import { LabelConfiguration, LabelsType } from "./types";
-import { labelsConfig } from "./labels-config";
-import { getPullRequestSizeLabel } from "./pull-request-size";
+import { LabelConfiguration } from "./types";
+import { getDefaultConfiguration, getLabelsDifferences, getRepositoryLabelsDifference } from "./utils";
+
+const defaultConfigPath = "./src/labels/default-config.yml";
 
 export async function main(): Promise<void> {
   try {
@@ -23,60 +24,33 @@ export async function main(): Promise<void> {
     const pullRequest: GithubContextPayloadPullRequest = github.context.payload.pull_request;
 
     if (!pullRequest) {
-      core.warning("Could not get pull request number from context, exiting");
-      return;
-    }
-
-    if (github.context.eventName !== "pull_request") {
-      core.warning("Comment only will be created on pull requests!");
+      core.warning("Could not get pull request from context, exiting...");
       return;
     }
 
     const octokit = github.getOctokit(githubToken);
 
-    await checkRepositoryLabels(octokit);
+    core.info(`Getting default label configuration....`);
+    const defaultConfiguration = await getDefaultConfiguration(defaultConfigPath);
+    core.info(`Successfully get label configuration with ${defaultConfiguration.labels.length} label(s)`);
 
+    core.info("\nSync Repository labels...");
+    await syncRepositoryLabels(octokit, defaultConfiguration.labels);
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const changedFiles = await getPullRequestFiles(octokit, pullRequest.number);
 
-    const detectedLabels = [];
-    const sizeLabel = getPullRequestSizeLabel(changedFiles);
-    detectedLabels.push(sizeLabel);
+    const detectedLabels: string[] = [];
+    // const sizeLabel = getPullRequestSizeLabel(changedFiles);
+    // detectedLabels.push(sizeLabel);
 
     core.info(`\nDetected labels:`);
     detectedLabels.forEach((detectedLabel, index) => {
       core.info(`[${index + 1}/${detectedLabels.length}]\t [${detectedLabel}]`);
     });
 
-    const pullRequestLabels = await listLabelsForPullRequest(octokit, pullRequest.number);
-
-    const differences = getLabelsDifferences(
-      pullRequestLabels.map((label) => label.name),
-      detectedLabels,
-      [...allLabelsNames]
-    );
-
-    if (differences.remove.length) {
-      core.info("\nRemoving labels from pull request...");
-      for (const labelToRemove of differences.remove) {
-        const index = differences.remove.indexOf(labelToRemove);
-        await removeLabelFromPullRequest(octokit, pullRequest.number, labelToRemove);
-        core.info(`[${index + 1}/${differences.remove.length}]\tRemoved label: ${labelToRemove}`);
-      }
-    }
-
-    if (differences.add.length) {
-      core.info("\nAdding labels to pull request...");
-      await addLabelsToPullRequest(octokit, pullRequest.number, detectedLabels);
-
-      for (const labelToAdd of differences.add) {
-        const index = differences.add.indexOf(labelToAdd);
-        core.info(`[${index + 1}/${differences.add.length}]\tAdded label: ${labelToAdd}`);
-      }
-    }
-
-    if (!differences.add.length && !differences.remove.length) {
-      core.info("\nAll pull request labels are up to date");
-    }
+    core.info("\nSync Pull Request labels...");
+    await syncPullRequestLabels(octokit, pullRequest.number, detectedLabels, defaultConfiguration.labels);
   } catch (error) {
     if (error instanceof Error) {
       core.error(error);
@@ -85,75 +59,86 @@ export async function main(): Promise<void> {
   }
 }
 
-async function checkRepositoryLabels(client: OctokitClient): Promise<void> {
-  core.info("Checking Repository Labels...");
-
+async function syncRepositoryLabels(
+  client: OctokitClient,
+  labelConfigurationList: LabelConfiguration[]
+): Promise<void> {
+  core.info("Getting Repository labels...");
   const repoLabels = await listLabelsForRepository(client);
 
-  const labelsToAdd: LabelsType[] = [...allLabelsNames];
-  const labelsToUpdate: LabelsType[] = [];
+  core.info("Checking differences between repository labels and supported labels configuration...");
+  const labelsDifferences = getRepositoryLabelsDifference(repoLabels, labelConfigurationList);
 
-  let foundLabelCount = 0;
-  repoLabels.forEach((label) => {
-    const labelName = label.name as LabelsType;
+  if (labelsDifferences.update?.length) {
+    core.info("\nUpdating Repository labels...");
 
-    if (allLabelsNames.includes(labelName) && !label.default) {
-      core.info(`[${foundLabelCount + 1}/${allLabelsNames.length}]\tA supported label was found: [${label.name}]`);
-      foundLabelCount = foundLabelCount + 1;
-
-      if (!validateLabelWithConfiguration(label, labelsConfig[labelName])) {
-        labelsToUpdate.push(labelName);
-      }
-
-      labelsToAdd.splice(labelsToAdd.indexOf(labelName), 1);
-    }
-  });
-
-  if (labelsToUpdate.length) {
-    core.info("\nUpdating repository labels...");
-    for (const labelToUpdate of labelsToUpdate) {
-      const index = labelsToUpdate.indexOf(labelToUpdate);
-      await updateLabel(client, labelsConfig[labelToUpdate]);
-      core.info(`[${index + 1}/${labelsToUpdate.length}]\tUpdated label: ${labelToUpdate}`);
+    const labelsNameToUpdate = labelsDifferences.update;
+    const labelConfigurationsToUpdate = labelConfigurationList.filter((labelConfig) =>
+      labelsNameToUpdate.includes(labelConfig.name)
+    );
+    for (const labelToUpdate of labelConfigurationsToUpdate) {
+      const index = labelConfigurationsToUpdate.indexOf(labelToUpdate);
+      await updateLabel(client, labelToUpdate);
+      core.info(`[${index + 1}/${labelsNameToUpdate.length}]\tUpdated label: [${labelToUpdate.name}]`);
     }
   }
 
-  if (labelsToAdd.length) {
-    core.info("\nCreating repository labels...");
-    for (const labelToAdd of labelsToAdd) {
-      const index = labelsToAdd.indexOf(labelToAdd);
-      await createLabel(client, labelsConfig[labelToAdd]);
-      core.info(`[${index + 1}/${labelsToAdd.length}]\tCreate label: ${labelToAdd}`);
+  if (labelsDifferences.add?.length) {
+    core.info("\nCreating Repository labels...");
+
+    const labelNamesToAdd = labelsDifferences.add;
+    const labelConfigurationsToAdd = labelConfigurationList.filter((labelConfig) =>
+      labelNamesToAdd.includes(labelConfig.name)
+    );
+    for (const labelToAdd of labelConfigurationsToAdd) {
+      const index = labelConfigurationsToAdd.indexOf(labelToAdd);
+      await createLabel(client, labelToAdd);
+      core.info(`[${index + 1}/${labelConfigurationsToAdd.length}]\tCreate label: [${labelToAdd.name}]`);
     }
   }
 
-  if (!labelsToAdd.length && !labelsToUpdate.length) {
+  if (!labelsDifferences.update?.length && !labelsDifferences.add?.length) {
     core.info("All labels are up to date");
   }
 }
 
-function validateLabelWithConfiguration(label: Label, labelConfiguration: LabelConfiguration): boolean {
-  return (
-    label.name === labelConfiguration.name &&
-    label.color === labelConfiguration.color &&
-    label.description === labelConfiguration.description
+async function syncPullRequestLabels(
+  client: OctokitClient,
+  pullRequestNumber: number,
+  detectedLabels: string[],
+  labelConfigurationList: LabelConfiguration[]
+): Promise<void> {
+  core.info("Getting Pull Request labels...");
+  const pullRequestLabels = await listLabelsForPullRequest(client, pullRequestNumber);
+
+  const differences = getLabelsDifferences(
+    pullRequestLabels.map((label) => label.name),
+    detectedLabels,
+    labelConfigurationList.map((label) => label.name)
   );
-}
 
-export function getLabelsDifferences(
-  pullRequestLabels: string[],
-  labels: string[],
-  allLabels: string[]
-): { add: string[]; remove: string[] } {
-  core.info("\nGetting differences...");
+  if (differences.delete?.length) {
+    core.info("\nRemoving labels from pull request...");
+    for (const labelToRemove of differences.delete) {
+      const index = differences.delete.indexOf(labelToRemove);
+      await removeLabelFromPullRequest(client, pullRequestNumber, labelToRemove);
+      core.info(`[${index + 1}/${differences.delete.length}]\tRemoved label: [${labelToRemove}]`);
+    }
+  }
 
-  labels = labels.filter((label) => allLabels.includes(label));
-  const pullRequestSupportedLabels = pullRequestLabels.filter((prLabel) => allLabels.includes(prLabel));
+  if (differences.add?.length) {
+    core.info("\nAdding labels to pull request...");
+    await addLabelsToPullRequest(client, pullRequestNumber, detectedLabels);
 
-  return {
-    add: labels.filter((label) => !pullRequestSupportedLabels.includes(label)),
-    remove: pullRequestSupportedLabels.filter((label) => !labels.includes(label))
-  };
+    for (const labelToAdd of differences.add) {
+      const index = differences.add.indexOf(labelToAdd);
+      core.info(`[${index + 1}/${differences.add.length}]\tAdded label: [${labelToAdd}]`);
+    }
+  }
+
+  if (!differences.add?.length && !differences.delete?.length) {
+    core.info("\nAll pull request labels are up to date");
+  }
 }
 
 main();

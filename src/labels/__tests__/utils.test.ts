@@ -1,7 +1,7 @@
 import { expect, test, describe } from "@jest/globals";
-import { getLabelsDifferences } from "./index";
+import { getLabelsDifferences } from "../utils";
 
-describe("Label Action", () => {
+describe("Labels Action Utils", () => {
   describe("getLabelsDifferences function", () => {
     const pullRequestLabels = [
       "label_1",
@@ -19,7 +19,7 @@ describe("Label Action", () => {
       const labelDiff = getLabelsDifferences(pullRequestLabels, detectedLabels, supportedLabels);
 
       expect(labelDiff.add).toEqual(["supported_label_4"]);
-      expect(labelDiff.remove).toEqual(["supported_label_1", "supported_label_2"]);
+      expect(labelDiff.delete).toEqual(["supported_label_1", "supported_label_2"]);
     });
 
     test("should return differences without unsupported label", () => {
@@ -28,7 +28,7 @@ describe("Label Action", () => {
       const labelDiff = getLabelsDifferences(pullRequestLabels, detectedLabels, supportedLabels);
 
       expect(labelDiff.add).toEqual(["supported_label_4"]);
-      expect(labelDiff.remove).toEqual(["supported_label_1", "supported_label_2"]);
+      expect(labelDiff.delete).toEqual(["supported_label_1", "supported_label_2"]);
     });
 
     test("should return no difference", () => {
@@ -37,7 +37,13 @@ describe("Label Action", () => {
       const labelDiff = getLabelsDifferences(pullRequestLabels, detectedLabels, supportedLabels);
 
       expect(labelDiff.add).toEqual([]);
-      expect(labelDiff.remove).toEqual([]);
+      expect(labelDiff.delete).toEqual([]);
     });
   });
+
+  // describe("getDefaultConfiguration function", () => {
+  //   test("getDefaultConfiguration", () => {
+  //     getDefaultConfiguration();
+  //   });
+  // });
 });
