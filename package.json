@@ -19,7 +19,7 @@
     "@semantic-release/npm": "^9.0.1",
     "@semantic-release/release-notes-generator": "^10.0.3",
     "@types/dedent": "^0.7.0",
-    "@types/node": "^17.0.42",
+    "@types/node": "^17.0.43",
     "@typescript-eslint/parser": "^5.28.0",
     "@vercel/ncc": "^0.34.0",
     "eslint": "^8.17.0",
