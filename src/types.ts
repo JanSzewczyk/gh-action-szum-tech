@@ -14,3 +14,13 @@ export type Label = types.Endpoints["GET /repos/{owner}/{repo}/labels"]["respons
 
 export type PullRequestFile =
   types.Endpoints["GET /repos/{owner}/{repo}/pulls/{pull_number}/files"]["response"]["data"][0];
+
+export enum PullRequestFileStatus {
+  ADDED = "added",
+  REMOVED = "removed",
+  MODIFIED = "modified",
+  RENAMED = "renamed",
+  COPIED = "copied",
+  CHANGED = "changed",
+  UNCHANGED = "unchanged"
+}

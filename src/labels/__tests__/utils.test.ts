@@ -1,5 +1,6 @@
 import { expect, test, describe } from "@jest/globals";
-import { getLabelsDifferences } from "../utils";
+import { filterFileNamesByPatterns, getLabelsDifferences, getPullRequestChangesReport } from "../utils";
+import { buildPullRequestFile } from "../../tests/builders/file.builder";
 
 describe("Labels Action Utils", () => {
   describe("getLabelsDifferences function", () => {
@@ -41,9 +42,77 @@ describe("Labels Action Utils", () => {
     });
   });
 
-  // describe("getDefaultConfiguration function", () => {
-  //   test("getDefaultConfiguration", () => {
-  //     getDefaultConfiguration();
-  //   });
-  // });
+  describe("getPullRequestChangesReport function", () => {
+    const fileBuilder = buildPullRequestFile();
+
+    test("should return pull request changes report", () => {
+      const prFiles = [
+        {
+          additions: 123,
+          changes: 146,
+          deletions: 23
+        },
+        {
+          additions: 12,
+          changes: 112,
+          deletions: 100
+        },
+        {
+          additions: 0,
+          changes: 23,
+          deletions: 23
+        }
+      ].map((config) =>
+        fileBuilder({
+          overrides: config
+        })
+      );
+
+      expect(getPullRequestChangesReport(prFiles)).toEqual({
+        additions: 135,
+        changes: 281,
+        deletions: 146
+      });
+    });
+
+    test("should return empty pull request changes report when no files", () => {
+      expect(getPullRequestChangesReport([])).toEqual({
+        additions: 0,
+        changes: 0,
+        deletions: 0
+      });
+    });
+  });
+
+  describe("filterFileNamesByPatterns function", () => {
+    const fileNames: string[] = [
+      "package.json",
+      "some-file.ts",
+      "some-file.test.ts",
+      "src/some-file.ts",
+      "src/some-file.test.ts"
+    ];
+
+    test("should return file names list filtered by one pattern", () => {
+      const ignorePatterns: string[] = ["*.ts"];
+
+      expect(filterFileNamesByPatterns(fileNames, ignorePatterns)).toEqual([
+        "package.json",
+        "src/some-file.ts",
+        "src/some-file.test.ts"
+      ]);
+    });
+
+    test("should return empty list when all file names match to patterns", () => {
+      const ignorePatterns: string[] = ["{**/*,*}.ts", "package.json"];
+
+      expect(filterFileNamesByPatterns(fileNames, ignorePatterns)).toEqual([]);
+    });
+
+    test("should return same list when there is no pattern", () => {
+      const ignorePatterns: string[] = [];
+
+      expect(filterFileNamesByPatterns(fileNames, ignorePatterns)).toEqual(fileNames);
+    });
+  });
 });

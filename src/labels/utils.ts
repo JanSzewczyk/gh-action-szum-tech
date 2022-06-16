@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import yaml from "js-yaml";
 import { Configuration, LabelChangesReport, LabelConfiguration, PullRequestChangesReport } from "./types";
 import { Label, PullRequestFile } from "../types";
+import minimatch from "minimatch";
 
 export async function getDefaultConfiguration(defaultConfigPath: string): Promise<Configuration> {
   const yamlFile = await fs.readFile(defaultConfigPath, "utf8");
@@ -72,4 +73,8 @@ export function getPullRequestChangesReport(files: PullRequestFile[]): PullReque
   }, pullRequestReport);
 
   return pullRequestReport;
+}
+
+export function filterFileNamesByPatterns(fileNames: string[], fileNamePatterns: string[]): string[] {
+  return fileNames.filter((fileName) => !fileNamePatterns.some((pattern) => minimatch(fileName, pattern)));
 }
