@@ -1,7 +1,7 @@
 import * as github from "@actions/github";
 import * as core from "@actions/core";
 
-import { GithubContextPayloadPullRequest, OctokitClient } from "../types";
+import { GithubContextPayloadPullRequest, OctokitClient, PullRequestFile } from "../types";
 import { getInput } from "@actions/core";
 import { getPullRequestFiles } from "../services/pull";
 import {
@@ -14,6 +14,7 @@ import {
 } from "../services/label";
 import { LabelConfiguration } from "./types";
 import { getDefaultConfiguration, getLabelsDifferences, getRepositoryLabelsDifference } from "./utils";
+import { validateLabel } from "./validation";
 
 const defaultConfigPath = "./src/labels/default-config.yml";
 
@@ -37,16 +38,14 @@ export async function main(): Promise<void> {
     core.info("\nSync Repository labels...");
     await syncRepositoryLabels(octokit, defaultConfiguration.labels);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    core.info("\nGetting Pull Request Files...");
     const changedFiles = await getPullRequestFiles(octokit, pullRequest.number);
 
-    const detectedLabels: string[] = [];
-    // const sizeLabel = getPullRequestSizeLabel(changedFiles);
-    // detectedLabels.push(sizeLabel);
+    core.info("\nDetecting Pull Request Labels...");
+    const detectedLabels = definePullRequestLabels(defaultConfiguration.labels, changedFiles);
 
-    core.info(`\nDetected labels:`);
     detectedLabels.forEach((detectedLabel, index) => {
-      core.info(`[${index + 1}/${detectedLabels.length}]\t [${detectedLabel}]`);
+      core.info(`[${index + 1}/${detectedLabels.length}]\t[${detectedLabel}]`); // X fajka
     });
 
     core.info("\nSync Pull Request labels...");
@@ -100,6 +99,21 @@ async function syncRepositoryLabels(
   if (!labelsDifferences.update?.length && !labelsDifferences.add?.length) {
     core.info("All labels are up to date");
   }
+}
+
+function definePullRequestLabels(
+  labelConfigurationList: LabelConfiguration[],
+  changedFiles: PullRequestFile[]
+): string[] {
+  const detectedLabels: string[] = [];
+
+  labelConfigurationList.forEach((labelConfiguration) => {
+    if (validateLabel(changedFiles, labelConfiguration.validation)) {
+      detectedLabels.push(labelConfiguration.name);
+    }
+  });
+
+  return detectedLabels;
 }
 
 async function syncPullRequestLabels(

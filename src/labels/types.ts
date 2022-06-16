@@ -18,13 +18,15 @@ export interface LabelValidation {
   deletions?: LabelSizeValidation;
 }
 
-export interface LabelSizeValidation {
-  equal?: number;
-  lessThan?: number;
-  lessOrEqualThan?: number;
-  greaterThan?: number;
-  greaterOrEqualThan?: number;
+export enum LabelSizeValidationType {
+  EQUAL = "equal",
+  LESS = "less",
+  LESS_OR_EQUAL = "lessOrEqual",
+  GREATER = "greater",
+  GREATER_OR_EQUAL = "greaterOrEqual"
 }
+
+export type LabelSizeValidation = Record<LabelSizeValidationType, number | undefined>;
 
 export interface PullRequestChangesReport {
   additions: number;
