@@ -1,5 +1,5 @@
 import { expect, test, describe, jest } from "@jest/globals";
-import { main } from "./index";
+import { main } from "../index";
 import { info } from "@actions/core";
 
 jest.mock("@actions/core", () => ({

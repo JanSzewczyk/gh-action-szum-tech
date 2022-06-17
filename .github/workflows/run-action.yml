@@ -34,8 +34,6 @@ jobs:
         uses: ./labels
         with:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-
-
 #  run-test:
 #    name: Run action ▶️
 #    runs-on: ${{ matrix.os }}

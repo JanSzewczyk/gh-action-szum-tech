@@ -44,10 +44,6 @@ export async function main(): Promise<void> {
     core.info("\nDetecting Pull Request Labels...");
     const detectedLabels = definePullRequestLabels(defaultConfiguration.labels, changedFiles);
 
-    detectedLabels.forEach((detectedLabel, index) => {
-      core.info(`[${index + 1}/${detectedLabels.length}]\t[${detectedLabel}]`); // X fajka
-    });
-
     core.info("\nSync Pull Request labels...");
     await syncPullRequestLabels(octokit, pullRequest.number, detectedLabels, defaultConfiguration.labels);
   } catch (error) {
