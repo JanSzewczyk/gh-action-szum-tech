@@ -106,9 +106,9 @@ function definePullRequestLabels(
   labelConfigurationList.forEach((labelConfiguration) => {
     if (validateLabel(changedFiles, labelConfiguration.validation)) {
       detectedLabels.push(labelConfiguration.name);
-      core.info(`✅\t[${labelConfiguration.name}]`);
+      core.info(`\t✅ [${labelConfiguration.name}]`);
     } else {
-      core.info(`❌\t[${labelConfiguration.name}]`);
+      core.info(`\t❌ [${labelConfiguration.name}]`);
     }
   });
 
