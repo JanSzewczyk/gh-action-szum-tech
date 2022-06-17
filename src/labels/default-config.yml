@@ -1,7 +1,8 @@
 labels:
+  # pull request sizes
   - name: "small"
     color: "4CAF50"
-    description: "Small size of pull request, up to 32 lines."
+    description: "Small size of pull request, up to 32 lines"
     validation:
       ignoreFiles: ["yarn.lock", "package-lock.json"]
       changes:
@@ -9,7 +10,7 @@ labels:
 
   - name: "medium"
     color: "FFEB3B"
-    description: "Medium size of pull request, from 32 to 128 lines."
+    description: "Medium size of pull request, from 32 to 128 lines"
     validation:
       ignoreFiles: ["yarn.lock", "package-lock.json"]
       changes:
@@ -18,7 +19,7 @@ labels:
 
   - name: "large"
     color: "FFC107"
-    description: "Large size of pull request, from 128 to 512 lines."
+    description: "Large size of pull request, from 128 to 512 lines"
     validation:
       ignoreFiles: ["yarn.lock", "package-lock.json"]
       changes:
@@ -27,7 +28,7 @@ labels:
 
   - name: "x_large"
     color: "FF5722"
-    description: "X_Large size of pull request, from 512 to 1024 lines."
+    description: "X_Large size of pull request, from 512 to 1024 lines"
     validation:
       ignoreFiles: ["yarn.lock", "package-lock.json"]
       changes:
@@ -36,7 +37,7 @@ labels:
 
   - name: "megalodon"
     color: "F44336"
-    description: "Pull request in MEGALODON size, over 1024 lines."
+    description: "Pull request in MEGALODON size, over 1024 lines"
     validation:
       ignoreFiles: ["yarn.lock", "package-lock.json"]
       changes:
@@ -44,8 +45,31 @@ labels:
 
   - name: "tests"
     color: "16c214"
-    description: "Tests are added in this Pull Request."
+    description: "Pull requests that update or add tests"
     validation:
-      any: ["{**/*}.{test,spec}.{js,ts,jsx,tsx}"]
+      any: ["**/*.{test,spec}.{js,ts,jsx,tsx}"]
 
+  - name: "github_actions"
+    color: "000000"
+    description: "Pull requests that update GitHub Actions code"
+    validation:
+      any: [".github/{*,**/*}"]
 
+  - name: "dependencies"
+    color: "0366d6"
+    description: "Pull requests that update a dependency file"
+    validation:
+      any: ["package.json", "yarn.lock", "package-lock.json"]
+
+  # programing languages
+  - name: "javascript"
+    color: "f0d91c"
+    description: "Pull requests that update a javascript code"
+    validation:
+      any: ["{*,**/*}.{js,jsx}"]
+
+  - name: "typescript"
+    color: "3178c6"
+    description: "Pull requests that update a typescript code"
+    validation:
+      any: ["{*,**/*}.{ts,tsx}"]
