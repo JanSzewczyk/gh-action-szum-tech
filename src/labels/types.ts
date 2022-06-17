@@ -26,7 +26,7 @@ export enum LabelSizeValidationType {
   GREATER_OR_EQUAL = "greaterOrEqual"
 }
 
-export type LabelSizeValidation = Record<LabelSizeValidationType, number | undefined>;
+export type LabelSizeValidation = Partial<Record<LabelSizeValidationType, number>>;
 
 export interface PullRequestChangesReport {
   additions: number;

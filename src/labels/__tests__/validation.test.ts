@@ -80,14 +80,6 @@ describe("Labels Action Validation", () => {
           expect(validateLabel(prFiles, labelValidation)).toBeFalsy();
         });
 
-        test("should return false when no pattern match to file names", () => {
-          const labelValidation: LabelValidation = {
-            any: ["*.java", "src/*.json"]
-          };
-
-          expect(validateLabel(prFiles, labelValidation)).toBeFalsy();
-        });
-
         test("should return false when pattern match to ignored file names", () => {
           const labelValidation: LabelValidation = {
             ignoreFiles: ["*.js"],
@@ -124,39 +116,187 @@ describe("Labels Action Validation", () => {
           expect(validateLabel(prFiles, labelValidation)).toBeFalsy();
         });
 
-        // test("should return false when no pattern match to file names", () => {
-        //   const labelValidation: LabelValidation = {
-        //     any: ["*.java", "src/*.json"]
-        //   };
-        //
-        //   expect(validateLabel(prFiles, labelValidation)).toBeFalsy();
-        // });
-        //
-        // test("should return false when no pattern match to file names", () => {
-        //   const labelValidation: LabelValidation = {
-        //     any: ["*.java", "src/*.json"]
-        //   };
-        //
-        //   expect(validateLabel(prFiles, labelValidation)).toBeFalsy();
-        // });
-        //
-        // test("should return false when pattern match to ignored file names", () => {
-        //   const labelValidation: LabelValidation = {
-        //     ignoreFiles: ["*.js"],
-        //     any: ["*.js"]
-        //   };
-        //
-        //   expect(validateLabel(prFiles, labelValidation)).toBeFalsy();
-        // });
-        //
-        // test("should return true when pattern matches part of ignored filenames", () => {
-        //   const labelValidation: LabelValidation = {
-        //     ignoreFiles: ["file-one.js"],
-        //     any: ["*.js"]
-        //   };
-        //
-        //   expect(validateLabel(prFiles, labelValidation)).toBeTruthy();
-        // });
+        test("should return false when no pattern match to file names", () => {
+          const labelValidation: LabelValidation = {
+            every: ["*.java", "src/*.json"]
+          };
+
+          expect(validateLabel(prFiles, labelValidation)).toBeFalsy();
+        });
+
+        test("should return false when pattern match to ignored file names", () => {
+          const labelValidation: LabelValidation = {
+            ignoreFiles: ["*.js"],
+            every: ["*.js"]
+          };
+
+          expect(validateLabel(prFiles, labelValidation)).toBeFalsy();
+        });
+
+        test("should return true when pattern matches part of ignored filenames", () => {
+          const labelValidation: LabelValidation = {
+            ignoreFiles: [".github/{**/*,*}", "src/{*,**/*}"],
+            every: ["*.js"]
+          };
+
+          expect(validateLabel(prFiles, labelValidation)).toBeTruthy();
+        });
+      });
+
+      describe("'changes'", () => {
+        test("'equal', should return true when changes are equal as in configuration", () => {
+          const labelValidation: LabelValidation = {
+            changes: {
+              equal: 309
+            }
+          };
+
+          expect(validateLabel(prFiles, labelValidation)).toBeTruthy();
+        });
+
+        test("'less', should return true when changes are less", () => {
+          const labelValidation: LabelValidation = {
+            changes: {
+              less: 400
+            }
+          };
+
+          expect(validateLabel(prFiles, labelValidation)).toBeTruthy();
+        });
+
+        test("'lessOrEqual', should return true when changes are less or equal", () => {
+          const labelValidation: LabelValidation = {
+            changes: {
+              lessOrEqual: 309
+            }
+          };
+
+          expect(validateLabel(prFiles, labelValidation)).toBeTruthy();
+        });
+
+        test("'greater', should return true when changes are greater", () => {
+          const labelValidation: LabelValidation = {
+            changes: {
+              greater: 234
+            }
+          };
+
+          expect(validateLabel(prFiles, labelValidation)).toBeTruthy();
+        });
+
+        test("'greaterOrEqual', should return true when changes are greater or equal", () => {
+          const labelValidation: LabelValidation = {
+            changes: {
+              greaterOrEqual: 309
+            }
+          };
+
+          expect(validateLabel(prFiles, labelValidation)).toBeTruthy();
+        });
+      });
+
+      describe("'additions'", () => {
+        test("'equal', should return true when additions are equal as in configuration", () => {
+          const labelValidation: LabelValidation = {
+            additions: {
+              equal: 219
+            }
+          };
+
+          expect(validateLabel(prFiles, labelValidation)).toBeTruthy();
+        });
+
+        test("'less', should return true when additions are less", () => {
+          const labelValidation: LabelValidation = {
+            additions: {
+              less: 400
+            }
+          };
+
+          expect(validateLabel(prFiles, labelValidation)).toBeTruthy();
+        });
+
+        test("'lessOrEqual', should return true when additions are less or equal", () => {
+          const labelValidation: LabelValidation = {
+            additions: {
+              lessOrEqual: 219
+            }
+          };
+
+          expect(validateLabel(prFiles, labelValidation)).toBeTruthy();
+        });
+
+        test("'greater', should return true when additions are greater", () => {
+          const labelValidation: LabelValidation = {
+            additions: {
+              greater: 200
+            }
+          };
+
+          expect(validateLabel(prFiles, labelValidation)).toBeTruthy();
+        });
+
+        test("'greaterOrEqual', should return true when additions are greater or equal", () => {
+          const labelValidation: LabelValidation = {
+            additions: {
+              greaterOrEqual: 219
+            }
+          };
+
+          expect(validateLabel(prFiles, labelValidation)).toBeTruthy();
+        });
+      });
+
+      describe("'deletions'", () => {
+        test("'equal', should return true when deletions are equal as in configuration", () => {
+          const labelValidation: LabelValidation = {
+            deletions: {
+              equal: 90
+            }
+          };
+
+          expect(validateLabel(prFiles, labelValidation)).toBeTruthy();
+        });
+
+        test("'less', should return true when deletions are less", () => {
+          const labelValidation: LabelValidation = {
+            deletions: {
+              less: 400
+            }
+          };
+
+          expect(validateLabel(prFiles, labelValidation)).toBeTruthy();
+        });
+
+        test("'lessOrEqual', should return true when deletions are less or equal", () => {
+          const labelValidation: LabelValidation = {
+            deletions: {
+              lessOrEqual: 219
+            }
+          };
+
+          expect(validateLabel(prFiles, labelValidation)).toBeTruthy();
+        });
+
+        test("'greater', should return true when deletions are greater", () => {
+          const labelValidation: LabelValidation = {
+            deletions: {
+              greater: 80
+            }
+          };
+
+          expect(validateLabel(prFiles, labelValidation)).toBeTruthy();
+        });
+
+        test("'greaterOrEqual', should return true when deletions are greater or equal", () => {
+          const labelValidation: LabelValidation = {
+            deletions: {
+              greaterOrEqual: 90
+            }
+          };
+
+          expect(validateLabel(prFiles, labelValidation)).toBeTruthy();
+        });
       });
     });
   });
@@ -314,7 +454,7 @@ describe("Labels Action Validation", () => {
           "file.config.js",
           "src/components/component.ts"
         ];
-        const patterns = ["**/*.ts", "{*,**/*}.js", "**/*.js", ".github/**/*.yml"];
+        const patterns = ["**/*.ts", "{*,**/*}.js", ".github/**/*.yml"];
 
         expect(checkEveryGlob(patterns, fileNames)).toBeTruthy();
       });

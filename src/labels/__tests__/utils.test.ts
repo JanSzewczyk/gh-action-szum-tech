@@ -103,6 +103,19 @@ describe("Labels Action Utils", () => {
       ]);
     });
 
+    test("should return file names list filtered by directory pattern", () => {
+      const fileList: string[] = [
+        ".github/workflows/action.yml",
+        "file-one.js",
+        "src/file.js",
+        "file.config.js",
+        "src/components/component.ts"
+      ];
+      const ignorePatterns: string[] = [".github/{*,**/*}", "src/{*,**/*}"];
+
+      expect(filterFileNamesByPatterns(fileList, ignorePatterns)).toEqual(["file-one.js", "file.config.js"]);
+    });
+
     test("should return empty list when all file names match to patterns", () => {
       const ignorePatterns: string[] = ["{**/*,*}.ts", "package.json"];
 
