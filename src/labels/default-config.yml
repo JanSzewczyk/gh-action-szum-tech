@@ -2,19 +2,50 @@ labels:
   - name: "small"
     color: "4CAF50"
     description: "Small size of pull request, up to 32 lines."
+    validation:
+      ignoreFiles: ["yarn.lock", "package-lock.json"]
+      changes:
+        less: 32
 
   - name: "medium"
     color: "FFEB3B"
     description: "Medium size of pull request, from 32 to 128 lines."
+    validation:
+      ignoreFiles: ["yarn.lock", "package-lock.json"]
+      changes:
+        greaterOrEqual: 32
+        less: 128
 
   - name: "large"
     color: "FFC107"
     description: "Large size of pull request, from 128 to 512 lines."
+    validation:
+      ignoreFiles: ["yarn.lock", "package-lock.json"]
+      changes:
+        greaterOrEqual: 128
+        less: 512
 
   - name: "x_large"
     color: "FF5722"
     description: "X_Large size of pull request, from 512 to 1024 lines."
+    validation:
+      ignoreFiles: ["yarn.lock", "package-lock.json"]
+      changes:
+        greaterOrEqual: 512
+        less: 1024
 
   - name: "megalodon"
     color: "F44336"
     description: "Pull request in MEGALODON size, over 1024 lines."
+    validation:
+      ignoreFiles: ["yarn.lock", "package-lock.json"]
+      changes:
+        greaterOrEqual: 1024
+
+  - name: "tests"
+    color: "16c214"
+    description: "Tests are added in this Pull Request."
+    validation:
+      any: ["{**/*}.{test,spec}.{js,ts,jsx,tsx}"]
+
+
