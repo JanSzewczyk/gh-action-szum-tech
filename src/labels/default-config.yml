@@ -61,6 +61,12 @@ labels:
     validation:
       any: ["package.json", "yarn.lock", "package-lock.json"]
 
+  - name: "documentation"
+    color: "0075ca"
+    description: "Improvements or additions to documentation"
+    validation:
+      any: [ "README.md", "LICENCE", "{*,**/*}.{md,mdx}" ]
+
   # programing languages
   - name: "javascript"
     color: "f0d91c"
