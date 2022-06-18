@@ -99,5 +99,8 @@ __tests__/runner/*
 lib/
 dist/
 
+# Ignore testing result file
+jest-result.json
+
 .vscode/
 .idea/

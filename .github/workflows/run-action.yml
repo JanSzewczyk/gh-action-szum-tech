@@ -57,3 +57,31 @@ jobs:
         uses: ./labels
         with:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+  jest-test-result:
+    name: Run jest-test-result action  ️
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        node-version: [ 16.x ]
+        os: [ ubuntu-latest ]
+
+    steps:
+      - name: Checkout code 📚
+        uses: actions/checkout@v3
+
+      - name: Set up Node 🟢
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install packages ⚙️
+        run: yarn install --frozen-lockfile
+
+      - name: Build 🏗️  ️
+        run: yarn run prepare-release
+
+      - name: Run `jest-test-result` action ▶️
+        uses: ./jest-test-result
+        with:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

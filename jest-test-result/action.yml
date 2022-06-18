@@ -1,0 +1,27 @@
+name: Jest Test Result
+author: Jan Szewczyk (Szum-Tech)
+description: |
+  Action that parses a jest json results file and creates a status check or Pull Request comment with the tests results.
+  Tests are not run as part of these action, they should run before it.
+  The results can be seen on the workflow run or Pull Request.
+
+inputs:
+  GITHUB_TOKEN:
+    description: "GitHub access token."
+    required: true
+  RESULTS_FILE:
+    description: "File name with Jest testing result."
+    required: false
+    default: jest-results.json
+  PR_COMMENT:
+    default: "true"
+    description: "Flag indicating whether a PR comment should be generated with the test results. If the value is `true`, the default behavior is to add or update an existing PR comment."
+    required: false
+  STATUS_CHECK:
+    default: "true"
+    description: "Flag indicating whether a status check with test results should be generated."
+    required: false
+
+runs:
+  using: node16
+  main: ../dist/jest-test-result/index.js
