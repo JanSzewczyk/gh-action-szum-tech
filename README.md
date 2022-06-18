@@ -15,6 +15,31 @@
 [![Eslint](https://github.com/JanSzewczyk/gh-action-szum-tech/actions/workflows/eslint.yml/badge.svg?branch=main)](https://github.com/JanSzewczyk/eslint-config-szum-tech/actions/workflows/codeql.yml)
 
 
+## Actions
+
+### Jest Test Result
+
+#### Inputs
+
+| Parameter          | Is Required | Default             | Description                                                                                                                                                              |
+|--------------------|-------------|---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `GITHUB_TOKEN`     | true        | N/A                 | Used for the GitHub Checks API.  Value is generally: secrets.GITHUB_TOKEN.                                                                                               |
+| `RESULTS_FILE`     | false       | `jest-results.json` | File name with Jest testing result.                                                                                                                                      |
+| `PR_COMMENT`       | false       | `true`              | Flag indicating whether a PR comment should be generated with the test results. If the value is `true`, the default behavior is to add or update an existing PR comment. |
+| `STATUS_CHECK`     | false       | `true`              | Flag indicating whether a status check with test results should be generated.                                                                                            |
+
+#### Outputs
+
+| Output |  Default            | Description                                                                                                                                                              |
+|--------|---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|        |                     |                                                                                                                                                                          |
+
+#### Usage Examples
+
+##### Using defaults
+
+##### Specifying additional behavior
+
 ## License
 
 MIT © Szum-Tech
