@@ -1,3 +1,12 @@
+## [1.3.1](https://github.com/JanSzewczyk/gh-action-szum-tech/compare/v1.3.0...v1.3.1) (2022-06-18)
+
+
+### Reverts
+
+* Revert "build(deps-dev): bump @octokit/types from 6.34.0 to 6.35.0" ([5164ae3](https://github.com/JanSzewczyk/gh-action-szum-tech/commit/5164ae3fd7dc87b4673d508db97d7229db051757))
+* Revert "build(deps): bump @actions/core from 1.8.2 to 1.9.0" ([df011db](https://github.com/JanSzewczyk/gh-action-szum-tech/commit/df011db39d88a42dc719460fea40a474860d2a47))
+* Revert "build(deps-dev): bump @types/node from 17.0.42 to 18.0.0" ([4b9d928](https://github.com/JanSzewczyk/gh-action-szum-tech/commit/4b9d928274c04ef930e9fce66a0762e1df73d5e5))
+
 # [1.3.0](https://github.com/JanSzewczyk/gh-action-szum-tech/compare/v1.2.1...v1.3.0) (2022-06-18)
 
 
