@@ -1,11 +1,11 @@
-name: Run Action
+name: Run Actions
 
 on:
   pull_request:
 
 jobs:
-  build:
-    name: Build 🏗️  ️
+  greetings-action:
+    name: Run greetings action  ️
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -27,8 +27,31 @@ jobs:
       - name: Build 🏗️  ️
         run: yarn run prepare-release
 
-      - name: Run `greetings` action ▶️
+      - name: Run action ▶️
         uses: ./
+
+  labels-action:
+    name: Run labels action  ️
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        node-version: [16.x]
+        os: [ubuntu-latest]
+
+    steps:
+      - name: Checkout code 📚
+        uses: actions/checkout@v3
+
+      - name: Set up Node 🟢
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install packages ⚙️
+        run: yarn install --frozen-lockfile
+
+      - name: Build 🏗️  ️
+        run: yarn run prepare-release
 
       - name: Run `labels` action ▶️
         uses: ./labels
