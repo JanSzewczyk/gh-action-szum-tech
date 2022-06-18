@@ -1,3 +1,10 @@
+## [1.3.2](https://github.com/JanSzewczyk/gh-action-szum-tech/compare/v1.3.1...v1.3.2) (2022-06-18)
+
+
+### Bug Fixes
+
+* **labels:** fix documentation role in default configuration ([9debe04](https://github.com/JanSzewczyk/gh-action-szum-tech/commit/9debe04f3c2068a9082b7205381b45c6458cf8ce))
+
 ## [1.3.1](https://github.com/JanSzewczyk/gh-action-szum-tech/compare/v1.3.0...v1.3.1) (2022-06-18)
 
 
