@@ -21,7 +21,7 @@ export function getRepositoryLabelsDifference(
     const labelName = label.name;
     const labelConfig = labelConfiguration.find((config) => config.name === labelName);
 
-    if (labelConfig && !label.default) {
+    if (labelConfig) {
       if (!checkLabelConfiguration(label, labelConfig)) {
         labelsToUpdate.push(labelName);
       }
