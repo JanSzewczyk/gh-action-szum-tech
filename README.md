@@ -17,7 +17,7 @@
 
 ## Actions
 
-### Jest Test Result
+### Jest Test Results
 
 #### Inputs
 

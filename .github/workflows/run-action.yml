@@ -59,7 +59,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
   jest-test-result:
-    name: Run jest-test-result action  ️
+    name: Run jest-test-results action  ️
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -81,7 +81,7 @@ jobs:
       - name: Build 🏗️  ️
         run: yarn run prepare-release
 
-      - name: Run `jest-test-result` action ▶️
-        uses: ./jest-test-result
+      - name: Run `jest-test-results` action ▶️
+        uses: ./jest-test-results
         with:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
