@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/JanSzewczyk/gh-action-szum-tech/compare/v1.3.2...v1.4.0) (2022-06-19)
+
+
+### Features
+
+* **jest-test-result:** prepare action workspace ([70310f5](https://github.com/JanSzewczyk/gh-action-szum-tech/commit/70310f5ee73a256121fa419ed3d40fdeb3edb541))
+
 ## [1.3.2](https://github.com/JanSzewczyk/gh-action-szum-tech/compare/v1.3.1...v1.3.2) (2022-06-18)
 
 
