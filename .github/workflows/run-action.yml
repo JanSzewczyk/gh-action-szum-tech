@@ -81,6 +81,10 @@ jobs:
       - name: Build 🏗️  ️
         run: yarn run prepare-release
 
+      - name: Run tests with results 🧪
+        run: yarn run test:json
+        continue-on-error: true
+
       - name: Run `jest-test-results` action ▶️
         uses: ./jest-test-results
         with:
