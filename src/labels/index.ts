@@ -2,7 +2,6 @@ import * as github from "@actions/github";
 import * as core from "@actions/core";
 
 import { GithubContextPayloadPullRequest, OctokitClient, PullRequestFile } from "../types";
-import { getInput } from "@actions/core";
 import { getPullRequestFiles } from "../services/pull";
 import {
   addLabelsToPullRequest,
@@ -20,7 +19,7 @@ const defaultConfigPath = "./src/labels/default-config.yml";
 
 export async function main(): Promise<void> {
   try {
-    const githubToken = getInput("GITHUB_TOKEN", { required: true });
+    const githubToken = core.getInput("GITHUB_TOKEN", { required: true });
 
     const pullRequest: GithubContextPayloadPullRequest = github.context.payload.pull_request;
 

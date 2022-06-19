@@ -1,4 +1,4 @@
-name: Jest Test Result
+name: Jest Test Results
 author: Jan Szewczyk (Szum-Tech)
 description: |
   Action that parses a jest json results file and creates a status check or Pull Request comment with the tests results.
@@ -10,7 +10,7 @@ inputs:
     description: "GitHub access token."
     required: true
   RESULTS_FILE:
-    description: "File name with Jest testing result."
+    description: "File name with Jest testing results."
     required: false
     default: jest-results.json
   PR_COMMENT:
@@ -24,4 +24,4 @@ inputs:
 
 runs:
   using: node16
-  main: ../dist/jest-test-result/index.js
+  main: ../dist/jest-test-results/index.js
