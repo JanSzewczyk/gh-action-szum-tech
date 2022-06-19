@@ -50,7 +50,7 @@
     "lint:fix": "eslint --fix {**/*,*}.{js,ts}",
     "package": "ncc build --source-map --license licenses.txt",
     "package:labels": "ncc build lib/labels/index.js --source-map -o dist/labels",
-    "package:jest-test-results": "ncc build lib/jest-test-result/main.js --source-map -o dist/jest-test-results",
+    "package:jest-test-results": "ncc build lib/jest-test-results/main.js --source-map -o dist/jest-test-results",
     "prepare-release": "yarn run build && yarn run package && yarn run package:labels && yarn run package:jest-test-results",
     "prettier": "prettier .",
     "prettier:write": "prettier --write .",
