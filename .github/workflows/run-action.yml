@@ -55,8 +55,6 @@ jobs:
 
       - name: Run `labels` action ▶️
         uses: ./labels
-        with:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
   jest-test-result:
     name: Run jest-test-results action  ️
@@ -87,5 +85,5 @@ jobs:
 
       - name: Run `jest-test-results` action ▶️
         uses: ./jest-test-results
-        with:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+#        with:
+#          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

@@ -1,6 +1,7 @@
 import * as core from "@actions/core";
 import * as fs from "fs";
 import { JestAssertionResult, JestResults, JestResultStatus, JestTestResult } from "./types";
+import { githubMessageBuilder } from "../utils/github-message-builder";
 
 export async function readTestsResultsFromJSONFile(fileName: string): Promise<JestResults | null> {
   core.info("Reading test results from file...");
@@ -25,12 +26,14 @@ export async function readTestsResultsFromJSONFile(fileName: string): Promise<Je
 }
 
 export function createTestReportMessage(jestResults: JestResults): string {
-  return `
-  # Jest Test Results  ${buildTestBadge(jestResults)}
-  ${buildTestDurationDetails(jestResults)}
-  ${buildTestCounters(jestResults)}
-  ${buildTestResults(jestResults)}
-  `;
+  return githubMessageBuilder()
+    .watermark("szum-tech/jest-test-results")
+    .h1(`Jest Test Results  ${buildTestBadge(jestResults)}`)
+    .add(buildTestDurationDetails(jestResults))
+    .add(buildTestCounters(jestResults))
+    .hr()
+    .add(...buildTestResults(jestResults))
+    .build();
 }
 
 export function buildTestBadge(jestResults: JestResults): string {
@@ -73,7 +76,7 @@ function buildTestDurationDetails(jestResults: JestResults): string {
 
   return `
   <details>  
-    <summary><strong>Duration: ${duration} second(s)</strong></summary>
+    <summary>Duration: <strong>${duration} second(s)</strong></summary>
     <br/>
     <table>
       <tr>
@@ -94,78 +97,87 @@ function buildTestDurationDetails(jestResults: JestResults): string {
 }
 
 function buildTestCounters(jestResults: JestResults): string {
+  const counterRows = [
+    {
+      label: "Total Test Suites",
+      value: jestResults.numTotalTestSuites
+    },
+    {
+      label: "Total Tests",
+      value: jestResults.numTotalTests
+    },
+    {
+      label: "Failed Test Suites",
+      value: jestResults.numFailedTestSuites
+    },
+    {
+      label: "Failed Tests",
+      value: jestResults.numFailedTests
+    },
+    {
+      label: "Passed Test Suites",
+      value: jestResults.numPassedTestSuites
+    },
+    {
+      label: "Pending Test Suites",
+      value: jestResults.numPendingTestSuites
+    },
+    {
+      label: "Pending Tests",
+      value: jestResults.numPendingTestSuites
+    },
+    {
+      label: "Runtime Error Test Suites",
+      value: jestResults.numRuntimeErrorTestSuites
+    },
+    {
+      label: "TODO Tests",
+      value: jestResults.numTodoTests
+    }
+  ];
+
   return `
   <details>
-    <summary><strong>Status: ${jestResults.success ? "Passed" : "Failed"} | Total Tests: ${
+    <summary>Status: <strong>${jestResults.success ? "Passed" : "Failed"}</strong> | Total Tests: <strong>${
     jestResults.numTotalTests
-  } | Passed: ${jestResults.numPassedTests} | Failed: ${jestResults.numFailedTests}</strong></summary>
+  }</strong> | Passed: <strong>${jestResults.numPassedTests}</strong> | Failed: <strong>${
+    jestResults.numFailedTests
+  }</summary>
     <br/>
     <table>
-      <tr>
-         <th>Total Test Suites</th>
-         <td>${jestResults.numTotalTestSuites}</td>
-      </tr>
-      <tr>
-         <th>Total Tests</th>
-         <td>${jestResults.numTotalTests}</td>
-      </tr>
-      <tr>
-         <th>Failed Test Suites</th>
-         <td>${jestResults.numFailedTestSuites}</td>    
-      </tr>
-      <tr>
-         <th>Failed Tests</th>
-         <td>${jestResults.numFailedTests}</td>    
-      </tr>
-      <tr>
-         <th>Passed Test Suites</th>
-         <td>${jestResults.numPassedTestSuites}</td>    
-      </tr>
-      <tr>
-         <th>Passed Tests</th>
-         <td>${jestResults.numPassedTests}</td>    
-      </tr>
-      <tr>
-         <th>Pending Test Suites</th>
-         <td>${jestResults.numPendingTestSuites}</td>    
-      </tr>
-      <tr>
-         <th>Pending Tests</th>
-         <td>${jestResults.numPendingTestSuites}</td>    
-      </tr>
-      <tr>
-         <th>Runtime Error Test Suites</th>
-         <td>${jestResults.numRuntimeErrorTestSuites}</td>    
-      </tr>
-      <tr>
-         <th>TODO Tests</th>
-         <td>${jestResults.numTodoTests}</td>    
-      </tr>
+    ${counterRows
+      .filter((r) => r.value)
+      .map((c) => `<tr><th>${c.label}</th><td>${c.value}</td></tr>`)
+      .join("\n")}
     </table>
   </details>
   `.trim();
 }
 
-function buildTestResults(jestResults: JestResults): string {
+function buildTestResults(jestResults: JestResults): string[] {
   if (!jestResults.numFailedTests || jestResults.testResults.length === 0) {
     return buildNoTestResultsMessage();
   } else {
     const failedTests = findFailedTests(jestResults.testResults);
 
-    let failedTestMessage = "";
+    const failedTestMessageBuilder = githubMessageBuilder()
+      .h2(":interrobang: Failed Test Results")
+      .quote("Below are the results of the failed tests.")
+      .br();
+
     failedTests.forEach((failedTest) => {
-      failedTestMessage += buildFailedTestRsultMessage(failedTest);
+      failedTestMessageBuilder.add(buildFailedTestResultMessage(failedTest));
     });
 
-    return failedTestMessage.trim();
+    return failedTestMessageBuilder.get();
   }
 }
 
-function buildNoTestResultsMessage(): string {
-  return `
-  ## :grey_question: Test Results
-  There were no test results to report.
-  `.trim();
+function buildNoTestResultsMessage(): string[] {
+  return githubMessageBuilder()
+    .h2(":white_check_mark: Test Results")
+    .quote("There were no test results to report.\n\nAll tests passed.\n\n:v:")
+    .get();
 }
 
 export function findFailedTests(testResults: JestTestResult[]): JestAssertionResult[] {
@@ -175,16 +187,22 @@ export function findFailedTests(testResults: JestTestResult[]): JestAssertionRes
     .filter((a) => a && a.status === JestResultStatus.FAILED);
 }
 
-function buildFailedTestRsultMessage(failedTest: JestAssertionResult): string {
+function buildFailedTestResultMessage(failedTest: JestAssertionResult): string {
+  core.info(`Processing '${failedTest.fullName}' test...`);
+
   const message = failedTest.failureMessages.join("\n").replace(/\\u001b\[\d{1,2}m/gi, "");
 
   return `
   <details>
-    <summary>:x: ${failedTest.fullName}</summary>    
+    <summary><i>:x: ${failedTest.fullName}</i></summary>    
     <table>
       <tr>
          <th>Title</th>
-         <td><code>${failedTest.title}</code></td>
+         <td>${failedTest.title}</td>
+      </tr>
+      <tr>
+        <th>Ancestor Titles</th>
+        <td>${failedTest.ancestorTitles.join(" / ")}</td>
       </tr>
       <tr>
          <th>Status</th>
@@ -196,7 +214,9 @@ function buildFailedTestRsultMessage(failedTest: JestAssertionResult): string {
       </tr>
       <tr>
         <th>Failure Messages</th>
-        <td><pre>${message}</pre></td>
+<td><pre>
+${message}
+</pre></td>
       </tr>
     </table>
   </details>
