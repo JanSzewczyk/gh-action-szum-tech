@@ -1,3 +1,12 @@
+# [1.5.0](https://github.com/JanSzewczyk/gh-action-szum-tech/compare/v1.4.0...v1.5.0) (2022-06-22)
+
+
+### Features
+
+* **jest-test-result:** added status check ([5442b56](https://github.com/JanSzewczyk/gh-action-szum-tech/commit/5442b56d841382b5498454afe3cccf176eec22c5))
+* **jest-test-result:** create action ([718d91f](https://github.com/JanSzewczyk/gh-action-szum-tech/commit/718d91fc10179909c2053efb8cf626de927f5170))
+* **jest-test-result:** create action ([5f741ce](https://github.com/JanSzewczyk/gh-action-szum-tech/commit/5f741cebeacd8cb46aa6e0fc9c45a7a0eaeffb81))
+
 # [1.4.0](https://github.com/JanSzewczyk/gh-action-szum-tech/compare/v1.3.2...v1.4.0) (2022-06-19)
 
 

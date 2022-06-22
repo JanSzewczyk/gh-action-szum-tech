@@ -42,7 +42,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.main = void 0;
 const github = __importStar(__nccwpck_require__(5438));
 const core = __importStar(__nccwpck_require__(2186));
-const core_1 = __nccwpck_require__(2186);
 const pull_1 = __nccwpck_require__(7551);
 const label_1 = __nccwpck_require__(7156);
 const utils_1 = __nccwpck_require__(3872);
@@ -51,7 +50,7 @@ const defaultConfigPath = "./src/labels/default-config.yml";
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const githubToken = (0, core_1.getInput)("GITHUB_TOKEN", { required: true });
+            const githubToken = core.getInput("GITHUB_TOKEN", { required: true });
             const pullRequest = github.context.payload.pull_request;
             if (!pullRequest) {
                 core.warning("Could not get pull request from context, exiting...");
