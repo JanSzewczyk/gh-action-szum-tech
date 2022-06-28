@@ -49,7 +49,7 @@ export function tableRowBuilder(content: string[] = []): TableRowBuilderReturnTy
   };
 }
 
-interface TableBuilderReturnType extends ReturnBuilderType {
+export interface TableBuilderReturnType extends ReturnBuilderType {
   body: (row: (rowBuilder: TableRowBuilderType) => TableRowBuilderReturnType[]) => TableBuilderReturnType;
 }
 

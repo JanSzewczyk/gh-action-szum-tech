@@ -1,7 +1,7 @@
 import * as core from "@actions/core";
 import * as fs from "fs";
 import { JestAssertionResult, JestResults, JestResultStatus, JestTestResult } from "./types";
-import { githubMessageBuilder } from "../utils/github-message-builder/github-message-builder";
+import githubMessageBuilder from "../utils/github-message-builder/github-message-builder";
 
 export async function readTestsResultsFromJSONFile(fileName: string): Promise<JestResults | null> {
   core.info("Reading test results from file...");
@@ -25,7 +25,7 @@ export async function readTestsResultsFromJSONFile(fileName: string): Promise<Je
   }
 }
 
-export function createTestReportMessage(jestResults: JestResults): string {
+export function createTestReportMessage(jestResults: JestResults): string | null {
   return githubMessageBuilder()
     .watermark("szum-tech/jest-test-results")
     .h1(`Jest Test Results  ${buildTestBadge(jestResults)}`)

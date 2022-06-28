@@ -1,6 +1,5 @@
 import { ReturnBuilderType } from "../types";
-import {
-  githubMessageBuilder,
+import githubMessageBuilder, {
   GithubMessageBuilderType,
   GithubMessageBuilderReturnType
 } from "../github-message-builder";
