@@ -40,6 +40,25 @@
 
 ##### Specifying additional behavior
 
+## Work in progress: 
+
+### Actions: 
+`labels`
+- [ ] add ability to define custom `label configuration`
+- [ ] docs
+- [ ] tests
+- [ ] update `labels/action.yml` file
+ 
+`jest-test-results`
+- [ ] docs
+- [ ] tests
+
+### Utils: 
+`github-message-builder`
+- [ ] change imports 
+- [ ] finish tests
+- [ ] improve already existed usages 
+
 ## License
 
 MIT © Szum-Tech
