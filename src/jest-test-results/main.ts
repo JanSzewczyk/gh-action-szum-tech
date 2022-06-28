@@ -33,6 +33,10 @@ async function main(): Promise<void> {
     }
 
     const testReportMessage = createTestReportMessage(testResults);
+    if (testReportMessage === null) {
+      core.setFailed("An error occurred while trying to build a GitHub message.");
+      return;
+    }
 
     if (shouldCreatePRComment) {
       await createPullRequestComment(octokit, testReportMessage);

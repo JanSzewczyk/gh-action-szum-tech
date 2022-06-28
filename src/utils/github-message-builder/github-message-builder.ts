@@ -1,4 +1,4 @@
-import textWithDecoratorBuilder, { TextWithDecoratorBuilderArgs, Decorators } from "./builders/decorators";
+import textWithDecoratorBuilder, { TextWithDecoratorBuilderArgs } from "./builders/decorators";
 import {
   buildBr,
   buildCodeBlock,
@@ -11,14 +11,11 @@ import {
   buildQuote,
   buildWatermark
 } from "./builders/common";
+import tableBuilder, { TableBuilderReturnType, TableBuilderType } from "./builders/table";
+import { ReturnBuilderType } from "./types";
+import detailsBuilder, { DetailsBuilderReturnType, DetailsBuilderType } from "./builders/details";
 
-interface DecoratorsAndElements extends Decorators {
-  codeBlock: (code: string, language: "json" | string) => string;
-}
-
-export type ContentWithDecoratorsAndElements = ((decoratorsAndElements: DecoratorsAndElements) => string) | string;
-
-export interface GithubMessageBuilderReturnType {
+export interface GithubMessageBuilderReturnType extends ReturnBuilderType {
   watermark: (text: string) => GithubMessageBuilderReturnType;
   text: (contentWithDecorators: TextWithDecoratorBuilderArgs) => GithubMessageBuilderReturnType;
   h1: (contentWithDecorators: TextWithDecoratorBuilderArgs) => GithubMessageBuilderReturnType;
@@ -30,15 +27,16 @@ export interface GithubMessageBuilderReturnType {
   codeBlock: (code: string, language: "json" | string) => GithubMessageBuilderReturnType;
   hr: () => GithubMessageBuilderReturnType;
   br: () => GithubMessageBuilderReturnType;
-  build: () => string;
-  get: () => string[];
+  table: (table: (tableBuilder: TableBuilderType) => TableBuilderReturnType) => GithubMessageBuilderReturnType;
+  details: (
+    details: (detailsBuilder: DetailsBuilderType) => DetailsBuilderReturnType
+  ) => GithubMessageBuilderReturnType;
   add: (...contentToAdd: string[]) => GithubMessageBuilderReturnType;
-  toString: () => void;
 }
 
 export type GithubMessageBuilderType = typeof githubMessageBuilder;
 
-export function githubMessageBuilder(content: string[] = []): GithubMessageBuilderReturnType {
+export default function githubMessageBuilder(content: string[] = []): GithubMessageBuilderReturnType {
   return {
     watermark(text: string): GithubMessageBuilderReturnType {
       content.push(buildWatermark(text));
@@ -84,12 +82,25 @@ export function githubMessageBuilder(content: string[] = []): GithubMessageBuild
       content.push(buildBr());
       return githubMessageBuilder(content);
     },
+    table(table: (tableBuilder: TableBuilderType) => TableBuilderReturnType): GithubMessageBuilderReturnType {
+      const t = table(tableBuilder).build();
+      if (t) {
+        content.push(t);
+      }
+      return githubMessageBuilder(content);
+    },
+    details(details: (detailsBuilder: DetailsBuilderType) => DetailsBuilderReturnType): GithubMessageBuilderReturnType {
+      const d = details(detailsBuilder).build();
+      if (d) {
+        content.push(d);
+      }
+      return githubMessageBuilder(content);
+    },
 
     // --------------------------------------- //
 
-    // TODO change to `string | null` as return type
-    build(): string {
-      return content.join("\n\n");
+    build(): string | null {
+      return content.length ? content.join("\n\n") : null;
     },
     add(...contentToAdd: string[]): GithubMessageBuilderReturnType {
       content.push(...contentToAdd);

@@ -1,13 +1,13 @@
 import { describe, expect, test } from "@jest/globals";
-import { githubMessageBuilder } from "../github-message-builder";
+import githubMessageBuilder from "../github-message-builder";
 
 describe("Github Message Builder", () => {
   test("should be initialize with empty array", () => {
     expect(githubMessageBuilder().get()).toEqual([]);
   });
 
-  test("should return empty string during building message when no content", () => {
-    expect(githubMessageBuilder().build()).toEqual("");
+  test("should return `null` during building message when no content", () => {
+    expect(githubMessageBuilder().build()).toEqual(null);
   });
 
   test("should return built text", () => {
@@ -23,7 +23,7 @@ describe("Github Message Builder", () => {
     const messageBuilder = githubMessageBuilder().h1(message);
 
     expect(messageBuilder.get().length).toEqual(1);
-    expect(messageBuilder.build().startsWith("# ")).toBeTruthy();
+    expect(messageBuilder.build()?.startsWith("# ")).toBeTruthy();
   });
 
   test("should return built header 2", () => {
@@ -31,7 +31,7 @@ describe("Github Message Builder", () => {
     const messageBuilder = githubMessageBuilder().h2(message);
 
     expect(messageBuilder.get().length).toEqual(1);
-    expect(messageBuilder.build().startsWith("## ")).toBeTruthy();
+    expect(messageBuilder.build()?.startsWith("## ")).toBeTruthy();
   });
 
   test("should return built header 3", () => {
@@ -39,7 +39,7 @@ describe("Github Message Builder", () => {
     const messageBuilder = githubMessageBuilder().h3(message);
 
     expect(messageBuilder.get().length).toEqual(1);
-    expect(messageBuilder.build().startsWith("### ")).toBeTruthy();
+    expect(messageBuilder.build()?.startsWith("### ")).toBeTruthy();
   });
 
   test("should return built header 4", () => {
@@ -47,7 +47,7 @@ describe("Github Message Builder", () => {
     const messageBuilder = githubMessageBuilder().h4(message);
 
     expect(messageBuilder.get().length).toEqual(1);
-    expect(messageBuilder.build().startsWith("#### ")).toBeTruthy();
+    expect(messageBuilder.build()?.startsWith("#### ")).toBeTruthy();
   });
 
   test("should return built header 5", () => {
@@ -55,7 +55,7 @@ describe("Github Message Builder", () => {
     const messageBuilder = githubMessageBuilder().h5(message);
 
     expect(messageBuilder.get().length).toEqual(1);
-    expect(messageBuilder.build().startsWith("##### ")).toBeTruthy();
+    expect(messageBuilder.build()?.startsWith("##### ")).toBeTruthy();
   });
 
   test("should return built quote", () => {
