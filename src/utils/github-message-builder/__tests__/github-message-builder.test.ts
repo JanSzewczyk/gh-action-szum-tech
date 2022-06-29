@@ -91,4 +91,31 @@ describe("Github Message Builder", () => {
     expect(messageBuilder.get().length).toEqual(1);
     expect(messageBuilder.build()).toEqual('```json\n{\n  "field": "aaa",\n  "field2": "bbb"\n}\n```');
   });
+
+  test("should return built table", () => {
+    const messageBuilder = githubMessageBuilder().table((tableBuilder) =>
+      tableBuilder().body((rowBuilder) => [
+        rowBuilder().th("label_1").td("data_1"),
+        rowBuilder().th("label_2").td("data_2")
+      ])
+    );
+
+    expect(messageBuilder.get().length).toEqual(1);
+    expect(messageBuilder.build()).toEqual(
+      "<table>\n<tr>\n<th>label_1</th>\n<td>data_1</td>\n</tr>\n<tr>\n<th>label_2</th>\n<td>data_2</td>\n</tr>\n</table>"
+    );
+  });
+
+  test("should return built details", () => {
+    const messageBuilder = githubMessageBuilder().details((detailsBuilder) =>
+      detailsBuilder()
+        .summary("summary")
+        .body((messageBuilder) => messageBuilder().h1("some title").text("some text"))
+    );
+
+    expect(messageBuilder.get().length).toEqual(1);
+    expect(messageBuilder.build()).toEqual(
+      "<details>\n<summary>summary</summary>\n\n# some title\n\nsome text\n</details>"
+    );
+  });
 });
