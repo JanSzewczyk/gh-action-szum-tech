@@ -2,6 +2,7 @@ import * as core from "@actions/core";
 import * as fs from "fs";
 import { JestAssertionResult, JestResults, JestResultStatus, JestTestResult } from "./types";
 import githubMessageBuilder from "../utils/github-message-builder/github-message-builder";
+import { codeDecorator, detailsBuilder } from "../utils/github-message-builder";
 
 export async function readTestsResultsFromJSONFile(fileName: string): Promise<JestResults | null> {
   core.info("Reading test results from file...");
@@ -64,7 +65,7 @@ function formatDate(dateToFormat: Date): string {
   }).format(dateToFormat);
 }
 
-function buildTestDurationDetails(jestResults: JestResults): string {
+function buildTestDurationDetails(jestResults: JestResults): string | null {
   const startDate = jestResults.startTime;
   const endDate = jestResults.testResults
     .map((m) => m.endTime)
@@ -74,29 +75,29 @@ function buildTestDurationDetails(jestResults: JestResults): string {
 
   const duration = (endDate - startDate) / 1000;
 
-  return `
-  <details>  
-    <summary>Duration: <strong>${duration} second(s)</strong></summary>
-    <br/>
-    <table>
-      <tr>
-          <th>Start</th>
-          <td><code>${formatDate(new Date(startDate))}</code></td>
-      </tr>
-      <tr>
-          <th>Finish</th>
-          <td><code>${formatDate(new Date(endDate))}</code></td>    
-      </tr>
-      <tr>
-          <th>Duration</th>
-          <td><code>${duration} second(s)</code></td>
-      </tr>
-    </table>
-  </details>
-  `.trim();
+  return detailsBuilder()
+    .summary(({ bold }) => `Duration: ${bold(`${duration} second(s)`)}`)
+    .body((messageBuilder) =>
+      messageBuilder()
+        .br()
+        .table((tableBuilder) =>
+          tableBuilder().body((rowBuilder) => [
+            rowBuilder()
+              .th("Start")
+              .td(codeDecorator(formatDate(new Date(startDate)))),
+            rowBuilder()
+              .th("Finish")
+              .td(codeDecorator(formatDate(new Date(endDate)))),
+            rowBuilder()
+              .th("Duration")
+              .td(codeDecorator(`${duration} second(s)`))
+          ])
+        )
+    )
+    .build();
 }
 
-function buildTestCounters(jestResults: JestResults): string {
+function buildTestCounters(jestResults: JestResults): string | null {
   const counterRows = [
     {
       label: "Total Test Suites",
@@ -136,22 +137,23 @@ function buildTestCounters(jestResults: JestResults): string {
     }
   ];
 
-  return `
-  <details>
-    <summary>Status: <strong>${jestResults.success ? "Passed" : "Failed"}</strong> | Total Tests: <strong>${
-    jestResults.numTotalTests
-  }</strong> | Passed: <strong>${jestResults.numPassedTests}</strong> | Failed: <strong>${
-    jestResults.numFailedTests
-  }</summary>
-    <br/>
-    <table>
-    ${counterRows
-      .filter((r) => r.value)
-      .map((c) => `<tr><th>${c.label}</th><td>${c.value}</td></tr>`)
-      .join("\n")}
-    </table>
-  </details>
-  `.trim();
+  return detailsBuilder()
+    .summary(
+      ({ bold }) =>
+        `Status: ${bold(jestResults.success ? "Passed" : "Failed")} | Total Tests: ${bold(
+          `${jestResults.numTotalTests}`
+        )} | Passed: ${bold(`${jestResults.numPassedTests}`)} | Failed: ${bold(`${jestResults.numFailedTests}`)}`
+    )
+    .body((messageBuilder) =>
+      messageBuilder()
+        .br()
+        .table((tableBuilder) =>
+          tableBuilder().body((rowBuilder) =>
+            counterRows.filter((r) => r.value).map((r) => rowBuilder().th(r.label).td(`${r.value}`))
+          )
+        )
+    )
+    .build();
 }
 
 function buildTestResults(jestResults: JestResults): string[] {
@@ -176,7 +178,7 @@ function buildTestResults(jestResults: JestResults): string[] {
 function buildNoTestResultsMessage(): string[] {
   return githubMessageBuilder()
     .h2(":white_check_mark: Test Results")
-    .quote("There were no test results to report.\n\nAll tests passed.\n\n:v:")
+    .quote("There were no test results to report.\n\nAll tests passed :v:")
     .get();
 }
 
@@ -187,38 +189,25 @@ export function findFailedTests(testResults: JestTestResult[]): JestAssertionRes
     .filter((a) => a && a.status === JestResultStatus.FAILED);
 }
 
-function buildFailedTestResultMessage(failedTest: JestAssertionResult): string {
+function buildFailedTestResultMessage(failedTest: JestAssertionResult): string | null {
   core.info(`Processing '${failedTest.fullName}' test...`);
 
   const message = failedTest.failureMessages.join("\n").replace(/\\u001b\[\d{1,2}m/gi, "");
 
-  return `
-  <details>
-    <summary><i>:x: ${failedTest.fullName}</i></summary>    
-    <table>
-      <tr>
-         <th>Title</th>
-         <td>${failedTest.title}</td>
-      </tr>
-      <tr>
-        <th>Ancestor Titles</th>
-        <td>${failedTest.ancestorTitles.join(" / ")}</td>
-      </tr>
-      <tr>
-         <th>Status</th>
-         <td><code>${failedTest.status}</code></td>
-      </tr>
-      <tr>
-         <th>Location</th>
-         <td><code>${failedTest.location}</code></td>
-      </tr>
-      <tr>
-        <th>Failure Messages</th>
-<td><pre>
-${message}
-</pre></td>
-      </tr>
-    </table>
-  </details>
-  `.trim();
+  return detailsBuilder()
+    .summary(({ italic }) => italic(`:x: ${failedTest.fullName}`))
+    .body((messageBuilder) =>
+      messageBuilder().table((tableBuilder) =>
+        tableBuilder().body((rowBuilder) => [
+          rowBuilder().th("Title").td(failedTest.title),
+          rowBuilder().th("Ancestor Titles").td(failedTest.ancestorTitles.join(" / ")),
+          rowBuilder().th("Status").td(codeDecorator(failedTest.status)),
+          rowBuilder()
+            .th("Location")
+            .td(failedTest.location ? codeDecorator(failedTest.location) : ""),
+          rowBuilder().th("Failure Messages").td(`<pre>\n${message}\n</pre>`)
+        ])
+      )
+    )
+    .build();
 }

@@ -31,7 +31,7 @@ export interface GithubMessageBuilderReturnType extends ReturnBuilderType {
   details: (
     details: (detailsBuilder: DetailsBuilderType) => DetailsBuilderReturnType
   ) => GithubMessageBuilderReturnType;
-  add: (...contentToAdd: string[]) => GithubMessageBuilderReturnType;
+  add: (...contentToAdd: (string | null)[]) => GithubMessageBuilderReturnType;
 }
 
 export type GithubMessageBuilderType = typeof githubMessageBuilder;
@@ -102,8 +102,9 @@ export default function githubMessageBuilder(content: string[] = []): GithubMess
     build(): string | null {
       return content.length ? content.join("\n\n") : null;
     },
-    add(...contentToAdd: string[]): GithubMessageBuilderReturnType {
-      content.push(...contentToAdd);
+    add(...contentToAdd: (string | null)[]): GithubMessageBuilderReturnType {
+      const filteredContentToAdd = contentToAdd.filter((c) => c) as string[];
+      content.push(...filteredContentToAdd);
       return githubMessageBuilder(content);
     },
     get(): string[] {

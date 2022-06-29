@@ -2,27 +2,27 @@ import { describe, expect, test } from "@jest/globals";
 import tableBuilder, { buildTable, buildTd, buildTh, buildTr, tableRowBuilder } from "../../builders/table";
 
 describe("Github Message Builder > Builders > Table", () => {
-  test("buildTable function, return a built table", () => {
+  test("buildTable(), return a built table", () => {
     const table = buildTable("table_content");
     expect(table).toEqual("<table>\ntable_content\n</table>");
   });
 
-  test("buildTr function, return a built table row", () => {
+  test("buildTr(), return a built table row", () => {
     const tr = buildTr("row_content");
     expect(tr).toEqual("<tr>\nrow_content\n</tr>");
   });
 
-  test("buildTh function, return a built table header", () => {
+  test("buildTh(), return a built table header", () => {
     const th = buildTh("table_header_content");
     expect(th).toEqual("<th>table_header_content</th>");
   });
 
-  test("buildTd function, return a built table data", () => {
+  test("buildTd(), return a built table data", () => {
     const td = buildTd("table_data_content");
     expect(td).toEqual("<td>table_data_content</td>");
   });
 
-  describe("tableRowBuilder function", () => {
+  describe("tableRowBuilder()", () => {
     test("should be initialize with empty array", () => {
       expect(tableRowBuilder().get()).toEqual([]);
     });
@@ -63,7 +63,7 @@ describe("Github Message Builder > Builders > Table", () => {
     });
   });
 
-  describe("tableBuilder function", () => {
+  describe("tableBuilder()", () => {
     test("should be initialize with empty array", () => {
       expect(tableBuilder().get()).toEqual([]);
     });

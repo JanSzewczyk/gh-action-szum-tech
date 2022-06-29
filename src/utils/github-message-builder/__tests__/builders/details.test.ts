@@ -2,17 +2,17 @@ import { describe, expect, test } from "@jest/globals";
 import detailsBuilder, { buildDetails, buildSummary, DetailsBuilderReturnType } from "../../builders/details";
 
 describe("Github Message Builder > Builders > Details", () => {
-  test("buildDetails function, should return a built details", () => {
+  test("buildDetails(), should return a built details", () => {
     const table = buildDetails("details_content");
     expect(table).toEqual("<details>\ndetails_content\n</details>");
   });
 
-  test("buildSummary function, should return a built summary", () => {
+  test("buildSummary(), should return a built summary", () => {
     const summary = buildSummary("summary_content");
     expect(summary).toEqual("<summary>summary_content</summary>");
   });
 
-  describe("detailsBuilder function", () => {
+  describe("detailsBuilder()", () => {
     test("should be initialize with empty array", () => {
       expect(detailsBuilder().get()).toEqual([]);
     });

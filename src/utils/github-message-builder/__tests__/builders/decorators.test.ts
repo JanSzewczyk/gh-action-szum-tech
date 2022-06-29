@@ -2,12 +2,12 @@ import { describe, expect, test } from "@jest/globals";
 import textWithDecoratorBuilder, { boldDecorator, codeDecorator, italicDecorator } from "../../builders/decorators";
 
 describe("Github Message Builder > Builders > Decorators", () => {
-  test("boldDecorator function, should return a built text with `bold` style", () => {
+  test("boldDecorator(), should return a built text with `bold` style", () => {
     const bold = boldDecorator("bold_text");
     expect(bold).toEqual("<strong>bold_text</strong>");
   });
 
-  test("codeDecorator function, should return a built text with `code` style", () => {
+  test("codeDecorator(), should return a built text with `code` style", () => {
     const code = codeDecorator("code_text");
     expect(code).toEqual("<code>code_text</code>");
   });
@@ -17,7 +17,7 @@ describe("Github Message Builder > Builders > Decorators", () => {
     expect(italic).toEqual("<i>italic_text</i>");
   });
 
-  describe("textWithDecoratorBuilder function", () => {
+  describe("textWithDecoratorBuilder()", () => {
     test("should return a built text without any decorators", () => {
       const text = textWithDecoratorBuilder("some_text");
       expect(text).toEqual("some_text");
