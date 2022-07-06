@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { bool, build, oneOf, sequence } from "@jackfranklin/test-data-bot";
 
-import type { Label } from "../../types";
+import type { Label } from "@types";
 import { ReturnBuilderFunction } from "../types/builder";
 
 export function buildLabel(): ReturnBuilderFunction<Label> {

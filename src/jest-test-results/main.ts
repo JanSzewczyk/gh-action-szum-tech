@@ -1,14 +1,15 @@
 import * as core from "@actions/core";
 import { createTestReportMessage, readTestsResultsFromJSONFile } from "./utils";
 import * as github from "@actions/github";
-import { GithubContextPayloadPullRequest, OctokitClient } from "../types";
-import { createComment, getCommentByMessagePrefix, updateComment } from "../services/issues";
-import { createCheck } from "../services/checks";
+import { CheckRunConclusion, CheckRunStatus, OctokitClient } from "@types";
+import { createComment, getCommentByMessagePrefix, updateComment } from "@services/issues";
+import { createCheck } from "@services/checks";
 import { JestResults } from "./types";
+import { getParametersDescription } from "@utils/utils";
 
 const messagePrefix = "<!-- szum-tech/jest-test-results -->";
 
-async function main(): Promise<void> {
+export async function main(): Promise<void> {
   try {
     const githubToken = core.getInput("GITHUB_TOKEN", { required: false, trimWhitespace: true });
     const resultsFileName = core.getInput("RESULTS_FILE", { required: false, trimWhitespace: true });
@@ -17,24 +18,23 @@ async function main(): Promise<void> {
 
     const octokit = github.getOctokit(githubToken);
 
-    core.info(`
-    PARAMETERS
-    ----------
-    GITHUB_TOKEN  : ${githubToken}
-    RESULTS_FILE  : ${resultsFileName}
-    PR_COMMENT    : ${shouldCreatePRComment}
-    STATUS_CHECK  : ${shouldCreateStatusCheck}
-    ----------
-    `);
+    core.info(
+      getParametersDescription({
+        GITHUB_TOKEN: githubToken,
+        RESULTS_FILE: resultsFileName,
+        PR_COMMENT: shouldCreatePRComment,
+        STATUS_CHECK: shouldCreateStatusCheck
+      })
+    );
 
-    const testResults = await readTestsResultsFromJSONFile(resultsFileName);
+    const testResults = readTestsResultsFromJSONFile(resultsFileName);
     if (!testResults) {
       return;
     }
 
     const testReportMessage = createTestReportMessage(testResults);
     if (testReportMessage === null) {
-      core.setFailed("An error occurred while trying to build a GitHub message.");
+      core.setFailed("An error occurred while trying to build a GitHub message");
       return;
     }
 
@@ -57,19 +57,19 @@ export async function createPullRequestComment(client: OctokitClient, message: s
   core.info("Creating or updating Pull Request comment...");
 
   try {
-    const pullRequest: GithubContextPayloadPullRequest = github.context.payload.pull_request;
-
-    if (!pullRequest) {
-      core.info("This event was not triggered by a pull_request. No comment will be created or updated.");
+    if (github.context.eventName !== "pull_request") {
+      core.info("This event was not triggered by a `pull_request` event. No comment will be created or updated.");
       return;
     }
 
+    const pullRequestNumber = github.context.payload.pull_request?.number as number;
+
     core.info("Checking for existing comment on Pull Request....");
-    const commentToUpdate = await getCommentByMessagePrefix(client, pullRequest.number, messagePrefix);
+    const commentToUpdate = await getCommentByMessagePrefix(client, pullRequestNumber, messagePrefix);
 
     if (!commentToUpdate) {
       core.info(`Creating a new Pull Request comment...`);
-      await createComment(client, pullRequest.number, message);
+      await createComment(client, pullRequestNumber, message);
     } else {
       core.info(`Updating existing Pull Request #${commentToUpdate.id} comment...`);
       await updateComment(client, commentToUpdate.id, message);
@@ -91,19 +91,19 @@ export async function createStatusCheck(
   try {
     const gitSha =
       github.context.eventName === "pull_request" ? github.context.payload.pull_request?.head.sha : github.context.sha;
-    core.info(`Creating Status Check for GitSha: #${gitSha} on a ${github.context.eventName} event.`);
+    core.info(`Creating Status Check for GitSha: #${gitSha} on a '${github.context.eventName}' event`);
 
     const checkTime = new Date().toUTCString();
     core.info(`Checking time: ${checkTime}`);
 
-    let conclusion = "success";
+    let conclusion = CheckRunConclusion.SUCCESS;
     if (!jestResults.success) {
-      conclusion = jestResults ? "neutral" : "failure";
+      conclusion = jestResults ? CheckRunConclusion.NEUTRAL : CheckRunConclusion.FAILURE;
     }
 
-    await createCheck(client, `status check - jest test results`, gitSha, "completed", conclusion, {
+    await createCheck(client, "status check - jest test results", gitSha, CheckRunStatus.COMPLETED, conclusion, {
       title: "Jest Test Results",
-      summary: `This test run completed at \`${checkTime}\``,
+      summary: `This test run completed at '${checkTime}'`,
       text: message
     });
   } catch (error) {

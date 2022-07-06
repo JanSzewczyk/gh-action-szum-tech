@@ -1,6 +1,6 @@
 import { expect, test, describe } from "@jest/globals";
 import { filterFileNamesByPatterns, getLabelsDifferences, getPullRequestChangesReport } from "../utils";
-import { buildPullRequestFile } from "../../tests/builders/file.builder";
+import { buildPullRequestFile } from "@tests/builders/file.builder";
 
 describe("Labels Action Utils", () => {
   describe("getLabelsDifferences function", () => {

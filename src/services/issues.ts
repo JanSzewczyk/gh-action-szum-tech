@@ -1,4 +1,4 @@
-import { IssueComment, OctokitClient } from "../types";
+import { IssueComment, OctokitClient } from "@types";
 import * as github from "@actions/github";
 import * as core from "@actions/core";
 
