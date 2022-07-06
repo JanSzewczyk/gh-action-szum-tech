@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import yaml from "js-yaml";
 import { Configuration, LabelChangesReport, LabelConfiguration, PullRequestChangesReport } from "./types";
-import { Label, PullRequestFile } from "../types";
+import { Label, PullRequestFile } from "@types";
 import minimatch from "minimatch";
 
 export async function getDefaultConfiguration(defaultConfigPath: string): Promise<Configuration> {

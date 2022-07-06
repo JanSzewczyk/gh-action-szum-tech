@@ -1,9 +1,9 @@
 import * as core from "@actions/core";
 import { createTestReportMessage, readTestsResultsFromJSONFile } from "./utils";
 import * as github from "@actions/github";
-import { GithubContextPayloadPullRequest, OctokitClient } from "../types";
-import { createComment, getCommentByMessagePrefix, updateComment } from "../services/issues";
-import { createCheck } from "../services/checks";
+import { OctokitClient } from "@types";
+import { createComment, getCommentByMessagePrefix, updateComment } from "@services/issues";
+import { createCheck } from "@services/checks";
 import { JestResults } from "./types";
 
 const messagePrefix = "<!-- szum-tech/jest-test-results -->";
@@ -27,14 +27,14 @@ async function main(): Promise<void> {
     ----------
     `);
 
-    const testResults = await readTestsResultsFromJSONFile(resultsFileName);
+    const testResults = readTestsResultsFromJSONFile(resultsFileName);
     if (!testResults) {
       return;
     }
 
     const testReportMessage = createTestReportMessage(testResults);
     if (testReportMessage === null) {
-      core.setFailed("An error occurred while trying to build a GitHub message.");
+      core.setFailed("An error occurred while trying to build a GitHub message");
       return;
     }
 
@@ -56,20 +56,24 @@ async function main(): Promise<void> {
 export async function createPullRequestComment(client: OctokitClient, message: string): Promise<void> {
   core.info("Creating or updating Pull Request comment...");
 
+  console.log("1. ", github.context);
   try {
-    const pullRequest: GithubContextPayloadPullRequest = github.context.payload.pull_request;
-
-    if (!pullRequest) {
-      core.info("This event was not triggered by a pull_request. No comment will be created or updated.");
+    if (github.context.eventName !== "pull_request") {
+      core.info("This event was not triggered by a `pull_request` event. No comment will be created or updated.");
       return;
     }
 
+    console.log("2. ", github.context);
+    const pullRequestNumber = github.context.payload.pull_request?.number as number;
+
     core.info("Checking for existing comment on Pull Request....");
-    const commentToUpdate = await getCommentByMessagePrefix(client, pullRequest.number, messagePrefix);
+    const commentToUpdate = await getCommentByMessagePrefix(client, pullRequestNumber, messagePrefix);
+
+    console.log(commentToUpdate);
 
     if (!commentToUpdate) {
       core.info(`Creating a new Pull Request comment...`);
-      await createComment(client, pullRequest.number, message);
+      await createComment(client, pullRequestNumber, message);
     } else {
       core.info(`Updating existing Pull Request #${commentToUpdate.id} comment...`);
       await updateComment(client, commentToUpdate.id, message);
@@ -91,7 +95,7 @@ export async function createStatusCheck(
   try {
     const gitSha =
       github.context.eventName === "pull_request" ? github.context.payload.pull_request?.head.sha : github.context.sha;
-    core.info(`Creating Status Check for GitSha: #${gitSha} on a ${github.context.eventName} event.`);
+    core.info(`Creating Status Check for GitSha: #${gitSha} on a \`${github.context.eventName}\` event`);
 
     const checkTime = new Date().toUTCString();
     core.info(`Checking time: ${checkTime}`);

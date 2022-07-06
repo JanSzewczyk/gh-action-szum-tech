@@ -1,7 +1,7 @@
 import { describe, expect, test } from "@jest/globals";
 import { checkAnyGlob, checkEveryGlob, checkSize, validateLabel } from "../validation";
 import { LabelSizeValidationType, LabelValidation } from "../types";
-import { buildPullRequestFile } from "../../tests/builders/file.builder";
+import { buildPullRequestFile } from "@tests/builders/file.builder";
 
 const pullRequestFileBuilder = buildPullRequestFile();
 

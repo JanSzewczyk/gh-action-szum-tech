@@ -1,4 +1,4 @@
-import { IssueComment, OctokitClient } from "../types";
+import { IssueComment, OctokitClient } from "@types";
 import * as github from "@actions/github";
 import * as core from "@actions/core";
 
@@ -45,6 +45,8 @@ export async function getCommentByMessagePrefix(
   messagePrefix: string
 ): Promise<IssueComment | null> {
   const issueComments = await getComments(client, pullRequestNumber);
+
+  core.info(JSON.stringify(issueComments, undefined, 2));
 
   core.info(`Finished getting comments for Pull Request #${pullRequestNumber}.`);
 

@@ -1,8 +1,8 @@
 import * as github from "@actions/github";
 import * as core from "@actions/core";
 
-import { GithubContextPayloadPullRequest, OctokitClient, PullRequestFile } from "../types";
-import { getPullRequestFiles } from "../services/pull";
+import { PullRequest, OctokitClient, PullRequestFile } from "@types";
+import { getPullRequestFiles } from "@services/pull";
 import {
   addLabelsToPullRequest,
   createLabel,
@@ -10,7 +10,7 @@ import {
   listLabelsForRepository,
   removeLabelFromPullRequest,
   updateLabel
-} from "../services/label";
+} from "@services/label";
 import { LabelConfiguration } from "./types";
 import { getDefaultConfiguration, getLabelsDifferences, getRepositoryLabelsDifference } from "./utils";
 import { validateLabel } from "./validation";
@@ -21,7 +21,7 @@ export async function main(): Promise<void> {
   try {
     const githubToken = core.getInput("GITHUB_TOKEN", { required: true });
 
-    const pullRequest: GithubContextPayloadPullRequest = github.context.payload.pull_request;
+    const pullRequest = github.context.payload.pull_request as PullRequest;
 
     if (!pullRequest) {
       core.warning("Could not get pull request from context, exiting...");
