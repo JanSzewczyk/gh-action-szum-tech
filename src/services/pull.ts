@@ -1,4 +1,4 @@
-import { OctokitClient, PullRequestFile } from "../types";
+import { OctokitClient, PullRequestFile } from "@types";
 import * as github from "@actions/github";
 
 export async function getPullRequestFiles(

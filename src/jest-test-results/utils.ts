@@ -4,7 +4,7 @@ import { JestAssertionResult, JestResults, JestResultStatus, JestTestResult } fr
 import githubMessageBuilder from "../utils/github-message-builder/github-message-builder";
 import { codeDecorator, detailsBuilder } from "../utils/github-message-builder";
 
-export async function readTestsResultsFromJSONFile(fileName: string): Promise<JestResults | null> {
+export function readTestsResultsFromJSONFile(fileName: string): JestResults | null {
   core.info("Reading test results from file...");
 
   if (fs.existsSync(fileName)) {
@@ -27,6 +27,8 @@ export async function readTestsResultsFromJSONFile(fileName: string): Promise<Je
 }
 
 export function createTestReportMessage(jestResults: JestResults): string | null {
+  core.info("Building GitHub message...");
+
   return githubMessageBuilder()
     .watermark("szum-tech/jest-test-results")
     .h1(`Jest Test Results  ${buildTestBadge(jestResults)}`)
@@ -52,7 +54,7 @@ export function buildTestBadge(jestResults: JestResults): string {
   return `![Generic badge](https://img.shields.io/badge/${badgeText}-${badgeStatusText}-${badgeColor}.svg)`;
 }
 
-function formatDate(dateToFormat: Date): string {
+export function formatDate(dateToFormat: Date): string {
   return new Intl.DateTimeFormat("default", {
     year: "numeric",
     month: "numeric",
@@ -61,7 +63,8 @@ function formatDate(dateToFormat: Date): string {
     minute: "numeric",
     second: "numeric",
     hour12: false,
-    timeZoneName: "short"
+    timeZoneName: "short",
+    timeZone: "UTC"
   }).format(dateToFormat);
 }
 

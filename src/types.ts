@@ -3,7 +3,11 @@ import types from "@octokit/types";
 
 export type GithubContext = typeof context;
 
-export type GithubContextPayloadPullRequest = GithubContext["payload"]["pull_request"];
+export type PullRequest = types.Endpoints["GET /repos/{owner}/{repo}/pulls/{pull_number}"]["response"]["data"];
+export type PullRequestUser = PullRequest["base"]["user"];
+export type PullRequestRepo = PullRequest["base"]["repo"];
+
+export type Repository = types.Endpoints["GET /repos/{owner}/{repo}"]["response"]["data"];
 
 export type OctokitClient = ReturnType<typeof getOctokit>;
 
@@ -23,4 +27,23 @@ export enum PullRequestFileStatus {
   COPIED = "copied",
   CHANGED = "changed",
   UNCHANGED = "unchanged"
+}
+
+export type User = types.Endpoints["GET /users/{username}"]["response"]["data"];
+export type SimpleUser = types.Endpoints["GET /users"]["response"]["data"][0];
+
+export type CheckRun = types.Endpoints["GET /repos/{owner}/{repo}/check-runs/{check_run_id}"]["response"]["data"];
+export enum CheckRunConclusion {
+  SUCCESS = "success",
+  FAILURE = "failure",
+  NEUTRAL = "neutral",
+  CANCELLED = "cancelled",
+  SKIPPED = "skipped",
+  TIME_OUT = "timed_out",
+  ACTION_REQUIRED = "action_required"
+}
+export enum CheckRunStatus {
+  QUEUED = "queued",
+  IN_PROGRESS = "in_progress",
+  COMPLETED = "completed"
 }
