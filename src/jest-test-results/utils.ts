@@ -4,7 +4,7 @@ import { JestAssertionResult, JestResults, JestResultStatus, JestTestResult } fr
 import githubMessageBuilder from "../utils/github-message-builder/github-message-builder";
 import { codeDecorator, detailsBuilder } from "../utils/github-message-builder";
 
-export async function readTestsResultsFromJSONFile(fileName: string): Promise<JestResults | null> {
+export function readTestsResultsFromJSONFile(fileName: string): JestResults | null {
   core.info("Reading test results from file...");
 
   if (fs.existsSync(fileName)) {
@@ -52,7 +52,7 @@ export function buildTestBadge(jestResults: JestResults): string {
   return `![Generic badge](https://img.shields.io/badge/${badgeText}-${badgeStatusText}-${badgeColor}.svg)`;
 }
 
-function formatDate(dateToFormat: Date): string {
+export function formatDate(dateToFormat: Date): string {
   return new Intl.DateTimeFormat("default", {
     year: "numeric",
     month: "numeric",
@@ -61,7 +61,8 @@ function formatDate(dateToFormat: Date): string {
     minute: "numeric",
     second: "numeric",
     hour12: false,
-    timeZoneName: "short"
+    timeZoneName: "short",
+    timeZone: "UTC"
   }).format(dateToFormat);
 }
 

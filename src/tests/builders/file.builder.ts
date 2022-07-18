@@ -2,7 +2,7 @@ import { faker } from "@faker-js/faker";
 import { build, oneOf } from "@jackfranklin/test-data-bot";
 
 import { ReturnBuilderFunction } from "../types/builder";
-import { PullRequestFile, PullRequestFileStatus } from "../../types";
+import { PullRequestFile, PullRequestFileStatus } from "@types";
 
 interface BuildPullRequestFileArgs {
   blobUrl?: string;

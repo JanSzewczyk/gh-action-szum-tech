@@ -3,7 +3,11 @@ import types from "@octokit/types";
 
 export type GithubContext = typeof context;
 
-export type GithubContextPayloadPullRequest = GithubContext["payload"]["pull_request"];
+export type PullRequest = types.Endpoints["GET /repos/{owner}/{repo}/pulls/{pull_number}"]["response"]["data"];
+export type PullRequestUser = PullRequest["base"]["user"];
+export type PullRequestRepo = PullRequest["base"]["repo"];
+
+export type Repository = types.Endpoints["GET /repos/{owner}/{repo}"]["response"]["data"];
 
 export type OctokitClient = ReturnType<typeof getOctokit>;
 
@@ -14,6 +18,8 @@ export type Label = types.Endpoints["GET /repos/{owner}/{repo}/labels"]["respons
 
 export type PullRequestFile =
   types.Endpoints["GET /repos/{owner}/{repo}/pulls/{pull_number}/files"]["response"]["data"][0];
+
+export type User = types.Endpoints["GET /users/{username}"]["response"]["data"];
 
 export enum PullRequestFileStatus {
   ADDED = "added",

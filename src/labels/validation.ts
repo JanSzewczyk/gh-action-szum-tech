@@ -1,6 +1,6 @@
 import minimatch from "minimatch";
 import { LabelSizeValidationType, LabelValidation, PullRequestChangesReport } from "./types";
-import { PullRequestFile } from "../types";
+import { PullRequestFile } from "@types";
 import { filterFileNamesByPatterns, getPullRequestChangesReport } from "./utils";
 
 export function validateLabel(changedFiles: PullRequestFile[], labelValidation: LabelValidation = {}): boolean {
