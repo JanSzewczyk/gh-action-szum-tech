@@ -15,11 +15,11 @@ inputs:
     required: false
     default: jest-results.json
   PR_COMMENT:
-    default: true
+    default: "true"
     description: "Flag indicating whether a PR comment should be generated with the test results. If the value is `true`, the default behavior is to add or update an existing PR comment."
     required: false
   STATUS_CHECK:
-    default: true
+    default: "true"
     description: "Flag indicating whether a status check with test results should be generated."
     required: false
 
