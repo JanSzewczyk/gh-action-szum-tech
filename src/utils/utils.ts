@@ -4,11 +4,9 @@ export function getParametersDescription(parameters: Record<string, string | boo
   }
   const nameLength = getMaxParameterNameLength() + 2;
   return [
-    [
-      "PARAMETERS",
-      "----------",
-      ...Object.keys(parameters).map((name) => `${name + " ".repeat(nameLength - name.length)}: ${parameters[name]}`),
-      "----------"
-    ]
+    "PARAMETERS",
+    "----------",
+    ...Object.keys(parameters).map((name) => `${name + " ".repeat(nameLength - name.length)}: ${parameters[name]}`),
+    "----------"
   ].join("\n");
 }
