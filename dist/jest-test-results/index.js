@@ -39,12 +39,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.createStatusCheck = exports.createPullRequestComment = void 0;
+exports.createStatusCheck = exports.createPullRequestComment = exports.main = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const utils_1 = __nccwpck_require__(9180);
 const github = __importStar(__nccwpck_require__(5438));
-const issues_1 = __nccwpck_require__(7988);
-const checks_1 = __nccwpck_require__(7875);
+const _types_1 = __nccwpck_require__(5077);
+const issues_1 = __nccwpck_require__(5784);
+const checks_1 = __nccwpck_require__(9290);
+const utils_2 = __nccwpck_require__(239);
 const messagePrefix = "<!-- szum-tech/jest-test-results -->";
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -54,20 +56,21 @@ function main() {
             const shouldCreatePRComment = core.getBooleanInput("PR_COMMENT", { required: false });
             const shouldCreateStatusCheck = core.getBooleanInput("STATUS_CHECK", { required: false });
             const octokit = github.getOctokit(githubToken);
-            core.info(`
-    PARAMETERS
-    ----------
-    GITHUB_TOKEN  : ${githubToken}
-    RESULTS_FILE  : ${resultsFileName}
-    PR_COMMENT    : ${shouldCreatePRComment}
-    STATUS_CHECK  : ${shouldCreateStatusCheck}
-    ----------
-    `);
-            const testResults = yield (0, utils_1.readTestsResultsFromJSONFile)(resultsFileName);
+            core.info((0, utils_2.getParametersDescription)({
+                GITHUB_TOKEN: githubToken,
+                RESULTS_FILE: resultsFileName,
+                PR_COMMENT: shouldCreatePRComment,
+                STATUS_CHECK: shouldCreateStatusCheck
+            }));
+            const testResults = (0, utils_1.readTestsResultsFromJSONFile)(resultsFileName);
             if (!testResults) {
                 return;
             }
             const testReportMessage = (0, utils_1.createTestReportMessage)(testResults);
+            if (testReportMessage === null) {
+                core.setFailed("An error occurred while trying to build a GitHub message");
+                return;
+            }
             if (shouldCreatePRComment) {
                 yield createPullRequestComment(octokit, testReportMessage);
             }
@@ -83,20 +86,22 @@ function main() {
         }
     });
 }
+exports.main = main;
 function createPullRequestComment(client, message) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         core.info("Creating or updating Pull Request comment...");
         try {
-            const pullRequest = github.context.payload.pull_request;
-            if (!pullRequest) {
-                core.info("This event was not triggered by a pull_request. No comment will be created or updated.");
+            if (github.context.eventName !== "pull_request") {
+                core.info("This event was not triggered by a `pull_request` event. No comment will be created or updated.");
                 return;
             }
+            const pullRequestNumber = (_a = github.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.number;
             core.info("Checking for existing comment on Pull Request....");
-            const commentToUpdate = yield (0, issues_1.getCommentByMessagePrefix)(client, pullRequest.number, messagePrefix);
+            const commentToUpdate = yield (0, issues_1.getCommentByMessagePrefix)(client, pullRequestNumber, messagePrefix);
             if (!commentToUpdate) {
                 core.info(`Creating a new Pull Request comment...`);
-                yield (0, issues_1.createComment)(client, pullRequest.number, message);
+                yield (0, issues_1.createComment)(client, pullRequestNumber, message);
             }
             else {
                 core.info(`Updating existing Pull Request #${commentToUpdate.id} comment...`);
@@ -117,16 +122,16 @@ function createStatusCheck(client, jestResults, message) {
         core.info("Creating Status Check...");
         try {
             const gitSha = github.context.eventName === "pull_request" ? (_a = github.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.head.sha : github.context.sha;
-            core.info(`Creating Status Check for GitSha: #${gitSha} on a ${github.context.eventName} event.`);
+            core.info(`Creating Status Check for GitSha: #${gitSha} on a '${github.context.eventName}' event`);
             const checkTime = new Date().toUTCString();
             core.info(`Checking time: ${checkTime}`);
-            let conclusion = "success";
+            let conclusion = _types_1.CheckRunConclusion.SUCCESS;
             if (!jestResults.success) {
-                conclusion = jestResults ? "neutral" : "failure";
+                conclusion = jestResults ? _types_1.CheckRunConclusion.NEUTRAL : _types_1.CheckRunConclusion.FAILURE;
             }
-            yield (0, checks_1.createCheck)(client, `status check - jest test results`, gitSha, "completed", conclusion, {
+            yield (0, checks_1.createCheck)(client, "status check - jest test results", gitSha, _types_1.CheckRunStatus.COMPLETED, conclusion, {
                 title: "Jest Test Results",
-                summary: `This test run completed at \`${checkTime}\``,
+                summary: `This test run completed at '${checkTime}'`,
                 text: message
             });
         }
@@ -188,41 +193,35 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.findFailedTests = exports.buildTestBadge = exports.createTestReportMessage = exports.readTestsResultsFromJSONFile = void 0;
+exports.findFailedTests = exports.formatDate = exports.buildTestBadge = exports.createTestReportMessage = exports.readTestsResultsFromJSONFile = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const fs = __importStar(__nccwpck_require__(7147));
 const types_1 = __nccwpck_require__(4370);
-const github_message_builder_1 = __nccwpck_require__(7564);
+const github_message_builder_1 = __importDefault(__nccwpck_require__(9894));
+const github_message_builder_2 = __nccwpck_require__(5776);
 function readTestsResultsFromJSONFile(fileName) {
-    return __awaiter(this, void 0, void 0, function* () {
-        core.info("Reading test results from file...");
-        if (fs.existsSync(fileName)) {
-            const raw = fs.readFileSync(fileName, "utf8");
-            if (!raw) {
-                core.setFailed(`The test results file '${fileName}' does not contain any data. No Pull Request comment or status check will be created.`);
-                return null;
-            }
-            return JSON.parse(raw);
-        }
-        else {
-            core.setFailed(`The test results file '${fileName}' does not exists. No Pull Request comment or status check will be created.`);
+    core.info("Reading test results from file...");
+    if (fs.existsSync(fileName)) {
+        const raw = fs.readFileSync(fileName, "utf8");
+        if (!raw) {
+            core.setFailed(`The test results file '${fileName}' does not contain any data. No Pull Request comment or status check will be created.`);
             return null;
         }
-    });
+        return JSON.parse(raw);
+    }
+    else {
+        core.setFailed(`The test results file '${fileName}' does not exists. No Pull Request comment or status check will be created.`);
+        return null;
+    }
 }
 exports.readTestsResultsFromJSONFile = readTestsResultsFromJSONFile;
 function createTestReportMessage(jestResults) {
-    return (0, github_message_builder_1.githubMessageBuilder)()
+    core.info("Building GitHub message...");
+    return (0, github_message_builder_1.default)()
         .watermark("szum-tech/jest-test-results")
         .h1(`Jest Test Results  ${buildTestBadge(jestResults)}`)
         .add(buildTestDurationDetails(jestResults))
@@ -253,9 +252,11 @@ function formatDate(dateToFormat) {
         minute: "numeric",
         second: "numeric",
         hour12: false,
-        timeZoneName: "short"
+        timeZoneName: "short",
+        timeZone: "UTC"
     }).format(dateToFormat);
 }
+exports.formatDate = formatDate;
 function buildTestDurationDetails(jestResults) {
     const startDate = jestResults.startTime;
     const endDate = jestResults.testResults
@@ -264,26 +265,22 @@ function buildTestDurationDetails(jestResults) {
         return b - a;
     })[0];
     const duration = (endDate - startDate) / 1000;
-    return `
-  <details>  
-    <summary>Duration: <strong>${duration} second(s)</strong></summary>
-    <br/>
-    <table>
-      <tr>
-          <th>Start</th>
-          <td><code>${formatDate(new Date(startDate))}</code></td>
-      </tr>
-      <tr>
-          <th>Finish</th>
-          <td><code>${formatDate(new Date(endDate))}</code></td>    
-      </tr>
-      <tr>
-          <th>Duration</th>
-          <td><code>${duration} second(s)</code></td>
-      </tr>
-    </table>
-  </details>
-  `.trim();
+    return (0, github_message_builder_2.detailsBuilder)()
+        .summary(({ bold }) => `Duration: ${bold(`${duration} second(s)`)}`)
+        .body((messageBuilder) => messageBuilder()
+        .br()
+        .table((tableBuilder) => tableBuilder().body((rowBuilder) => [
+        rowBuilder()
+            .th("Start")
+            .td((0, github_message_builder_2.codeDecorator)(formatDate(new Date(startDate)))),
+        rowBuilder()
+            .th("Finish")
+            .td((0, github_message_builder_2.codeDecorator)(formatDate(new Date(endDate)))),
+        rowBuilder()
+            .th("Duration")
+            .td((0, github_message_builder_2.codeDecorator)(`${duration} second(s)`))
+    ])))
+        .build();
 }
 function buildTestCounters(jestResults) {
     const counterRows = [
@@ -324,18 +321,12 @@ function buildTestCounters(jestResults) {
             value: jestResults.numTodoTests
         }
     ];
-    return `
-  <details>
-    <summary>Status: <strong>${jestResults.success ? "Passed" : "Failed"}</strong> | Total Tests: <strong>${jestResults.numTotalTests}</strong> | Passed: <strong>${jestResults.numPassedTests}</strong> | Failed: <strong>${jestResults.numFailedTests}</summary>
-    <br/>
-    <table>
-    ${counterRows
-        .filter((r) => r.value)
-        .map((c) => `<tr><th>${c.label}</th><td>${c.value}</td></tr>`)
-        .join("\n")}
-    </table>
-  </details>
-  `.trim();
+    return (0, github_message_builder_2.detailsBuilder)()
+        .summary(({ bold }) => `Status: ${bold(jestResults.success ? "Passed" : "Failed")} | Total Tests: ${bold(`${jestResults.numTotalTests}`)} | Passed: ${bold(`${jestResults.numPassedTests}`)} | Failed: ${bold(`${jestResults.numFailedTests}`)}`)
+        .body((messageBuilder) => messageBuilder()
+        .br()
+        .table((tableBuilder) => tableBuilder().body((rowBuilder) => counterRows.filter((r) => r.value).map((r) => rowBuilder().th(r.label).td(`${r.value}`)))))
+        .build();
 }
 function buildTestResults(jestResults) {
     if (!jestResults.numFailedTests || jestResults.testResults.length === 0) {
@@ -343,7 +334,7 @@ function buildTestResults(jestResults) {
     }
     else {
         const failedTests = findFailedTests(jestResults.testResults);
-        const failedTestMessageBuilder = (0, github_message_builder_1.githubMessageBuilder)()
+        const failedTestMessageBuilder = (0, github_message_builder_1.default)()
             .h2(":interrobang: Failed Test Results")
             .quote("Below are the results of the failed tests.")
             .br();
@@ -354,9 +345,9 @@ function buildTestResults(jestResults) {
     }
 }
 function buildNoTestResultsMessage() {
-    return (0, github_message_builder_1.githubMessageBuilder)()
+    return (0, github_message_builder_1.default)()
         .h2(":white_check_mark: Test Results")
-        .quote("There were no test results to report.\n\nAll tests passed.\n\n:v:")
+        .quote("There were no test results to report.\n\nAll tests passed :v:")
         .get();
 }
 function findFailedTests(testResults) {
@@ -369,267 +360,327 @@ exports.findFailedTests = findFailedTests;
 function buildFailedTestResultMessage(failedTest) {
     core.info(`Processing '${failedTest.fullName}' test...`);
     const message = failedTest.failureMessages.join("\n").replace(/\\u001b\[\d{1,2}m/gi, "");
-    return `
-  <details>
-    <summary><i>:x: ${failedTest.fullName}</i></summary>    
-    <table>
-      <tr>
-         <th>Title</th>
-         <td>${failedTest.title}</td>
-      </tr>
-      <tr>
-        <th>Ancestor Titles</th>
-        <td>${failedTest.ancestorTitles.join(" / ")}</td>
-      </tr>
-      <tr>
-         <th>Status</th>
-         <td><code>${failedTest.status}</code></td>
-      </tr>
-      <tr>
-         <th>Location</th>
-         <td><code>${failedTest.location}</code></td>
-      </tr>
-      <tr>
-        <th>Failure Messages</th>
-<td><pre>
-${message}
-</pre></td>
-      </tr>
-    </table>
-  </details>
-  `.trim();
+    return (0, github_message_builder_2.detailsBuilder)()
+        .summary(({ italic }) => italic(`:x: ${failedTest.fullName}`))
+        .body((messageBuilder) => messageBuilder().table((tableBuilder) => tableBuilder().body((rowBuilder) => [
+        rowBuilder().th("Title").td(failedTest.title),
+        rowBuilder().th("Ancestor Titles").td(failedTest.ancestorTitles.join(" / ")),
+        rowBuilder().th("Status").td((0, github_message_builder_2.codeDecorator)(failedTest.status)),
+        rowBuilder()
+            .th("Location")
+            .td(failedTest.location ? (0, github_message_builder_2.codeDecorator)(failedTest.location) : ""),
+        rowBuilder().th("Failure Messages").td(`<pre>\n${message}\n</pre>`)
+    ])))
+        .build();
 }
 
 
 /***/ }),
 
-/***/ 7875:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.createCheck = void 0;
-const github = __importStar(__nccwpck_require__(5438));
-const core = __importStar(__nccwpck_require__(2186));
-function createCheck(client, name, headSha, status, conclusion, output) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const response = yield client.rest.checks.create(Object.assign(Object.assign({}, github.context.repo), { name, head_sha: headSha, status,
-            conclusion,
-            output }));
-        if (response.status === 201) {
-            core.info(`Status Check #${response.data.id} was created with response status ${response.status}`);
-        }
-        else {
-            core.setFailed(`An error occurred trying to create Status Check. Error code: ${response.status}.`);
-        }
-    });
-}
-exports.createCheck = createCheck;
-
-
-/***/ }),
-
-/***/ 7988:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getCommentByMessagePrefix = exports.createComment = exports.updateComment = exports.getComments = void 0;
-const github = __importStar(__nccwpck_require__(5438));
-const core = __importStar(__nccwpck_require__(2186));
-function getComments(client, pullRequestNumber) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const { data: comments } = yield client.rest.issues.listComments(Object.assign(Object.assign({}, github.context.repo), { issue_number: pullRequestNumber }));
-        return comments;
-    });
-}
-exports.getComments = getComments;
-function updateComment(client, commentId, message) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const response = yield client.rest.issues.updateComment(Object.assign(Object.assign({}, github.context.repo), { comment_id: commentId, body: message }));
-        if (response.status === 200) {
-            core.info(`Pull Request #${response.data.id} comment was updated.`);
-        }
-        else {
-            core.setFailed(`An error occurred trying to update Pull Request comment. Error code: ${response.status}.`);
-        }
-    });
-}
-exports.updateComment = updateComment;
-function createComment(client, pullRequestNumber, message) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const response = yield client.rest.issues.createComment(Object.assign(Object.assign({}, github.context.repo), { issue_number: pullRequestNumber, body: message }));
-        if (response.status === 201) {
-            core.info(`Pull Request #${response.data.id} comment was created.`);
-        }
-        else {
-            core.setFailed(`An error occurred trying to create Pull Request comment. Error code: ${response.status}.`);
-        }
-    });
-}
-exports.createComment = createComment;
-function getCommentByMessagePrefix(client, pullRequestNumber, messagePrefix) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const issueComments = yield getComments(client, pullRequestNumber);
-        core.info(`Finished getting comments for Pull Request #${pullRequestNumber}.`);
-        const comment = issueComments.find((c) => c.body && c.body.startsWith(messagePrefix));
-        if (comment) {
-            core.info(`A jest tests result comment was found.`);
-            return comment;
-        }
-        else {
-            core.info(`A jest tests result comment was not found.`);
-            return null;
-        }
-    });
-}
-exports.getCommentByMessagePrefix = getCommentByMessagePrefix;
-
-
-/***/ }),
-
-/***/ 7564:
+/***/ 5155:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.githubMessageBuilder = void 0;
-function githubMessageBuilder(content = []) {
-    function boldDecorator(text) {
-        return `<strong>${text}</strong>`;
+exports.buildBr = exports.buildHr = exports.buildQuote = exports.buildH5 = exports.buildH4 = exports.buildH3 = exports.buildH2 = exports.buildH1 = exports.buildCodeBlock = exports.buildWatermark = void 0;
+function buildWatermark(content) {
+    return `<!-- ${content} -->`;
+}
+exports.buildWatermark = buildWatermark;
+function buildCodeBlock(code, language) {
+    return `\`\`\`${language}\n${code}\n\`\`\``;
+}
+exports.buildCodeBlock = buildCodeBlock;
+function buildH1(content) {
+    return `# ${content}`;
+}
+exports.buildH1 = buildH1;
+function buildH2(content) {
+    return `## ${content}`;
+}
+exports.buildH2 = buildH2;
+function buildH3(content) {
+    return `### ${content}`;
+}
+exports.buildH3 = buildH3;
+function buildH4(content) {
+    return `#### ${content}`;
+}
+exports.buildH4 = buildH4;
+function buildH5(content) {
+    return `##### ${content}`;
+}
+exports.buildH5 = buildH5;
+function buildQuote(content) {
+    return `<blockquote>${content}</blockquote>`;
+}
+exports.buildQuote = buildQuote;
+function buildHr() {
+    return "---";
+}
+exports.buildHr = buildHr;
+function buildBr() {
+    return "<br/>";
+}
+exports.buildBr = buildBr;
+
+
+/***/ }),
+
+/***/ 117:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.italicDecorator = exports.codeDecorator = exports.boldDecorator = void 0;
+function boldDecorator(text) {
+    return `<strong>${text}</strong>`;
+}
+exports.boldDecorator = boldDecorator;
+function codeDecorator(text) {
+    return `<code>${text}</code>`;
+}
+exports.codeDecorator = codeDecorator;
+function italicDecorator(text) {
+    return `<i>${text}</i>`;
+}
+exports.italicDecorator = italicDecorator;
+function textWithDecoratorBuilder(contentWithDecorators) {
+    if (typeof contentWithDecorators !== "string") {
+        return contentWithDecorators({ bold: boldDecorator, code: codeDecorator, italic: italicDecorator });
     }
-    function codeDecorator(text) {
-        return `<code>${text}</code>`;
+    else {
+        return contentWithDecorators;
     }
-    function italicDecorator(text) {
-        return `<i>${text}</i>`;
-    }
-    function createTextWithDecorator(contentWithDecorators) {
-        if (typeof contentWithDecorators !== "string") {
-            return contentWithDecorators({ bold: boldDecorator, code: codeDecorator, italic: italicDecorator });
+}
+exports["default"] = textWithDecoratorBuilder;
+
+
+/***/ }),
+
+/***/ 3755:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.buildSummary = exports.buildDetails = void 0;
+const github_message_builder_1 = __importDefault(__nccwpck_require__(9894));
+const decorators_1 = __importDefault(__nccwpck_require__(117));
+function buildDetails(content) {
+    return ["<details>", content, "</details>"].join("\n");
+}
+exports.buildDetails = buildDetails;
+function buildSummary(content) {
+    return ["<summary>", content, "</summary>"].join("");
+}
+exports.buildSummary = buildSummary;
+function detailsBuilder(content = []) {
+    function checkSummaryPosition(c) {
+        if (c.length) {
+            return c[0].startsWith("<summary>") && c[0].endsWith("</summary>");
         }
-        else {
-            return contentWithDecorators;
-        }
+        return false;
     }
     return {
+        summary(summary) {
+            if (content.length) {
+                throw new Error([
+                    "Github Message Builder > Builders > Details",
+                    checkSummaryPosition(content)
+                        ? "The summary has already been built."
+                        : "Error building summary, the summary function must be called first."
+                ].join("\n"));
+            }
+            content.push(buildSummary((0, decorators_1.default)(summary)));
+            return detailsBuilder(content);
+        },
+        body(body) {
+            if (!checkSummaryPosition(content)) {
+                throw new Error(["Github Message Builder > Builders > Details", "Error building body, no summary building before body."].join("\n"));
+            }
+            const b = body(github_message_builder_1.default).build();
+            if (b) {
+                content.push(b);
+            }
+            return detailsBuilder(content);
+        },
+        // --------------------------------------- //
+        build() {
+            return content.length ? buildDetails(content.join("\n\n")) : null;
+        },
+        get() {
+            return content;
+        },
+        toString() {
+            // eslint-disable-next-line no-console
+            console.log(this.build);
+        }
+    };
+}
+exports["default"] = detailsBuilder;
+
+
+/***/ }),
+
+/***/ 3513:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.tableRowBuilder = exports.buildTd = exports.buildTh = exports.buildTr = exports.buildTable = void 0;
+function buildTable(content) {
+    return ["<table>", content, "</table>"].join("\n");
+}
+exports.buildTable = buildTable;
+function buildTr(content) {
+    return ["<tr>", content, "</tr>"].join("\n");
+}
+exports.buildTr = buildTr;
+function buildTh(content) {
+    return ["<th>", content, "</th>"].join("");
+}
+exports.buildTh = buildTh;
+function buildTd(content) {
+    return ["<td>", content, "</td>"].join("");
+}
+exports.buildTd = buildTd;
+function tableRowBuilder(content = []) {
+    return {
+        th(text) {
+            content.push(buildTh(text));
+            return tableRowBuilder(content);
+        },
+        td(text) {
+            content.push(buildTd(text));
+            return tableRowBuilder(content);
+        },
+        // --------------------------------------- //
+        build() {
+            return content.length ? buildTr(content.join("\n")) : null;
+        },
+        get() {
+            return content;
+        },
+        toString() {
+            // eslint-disable-next-line no-console
+            console.log(this.build);
+        }
+    };
+}
+exports.tableRowBuilder = tableRowBuilder;
+function tableBuilder(content = []) {
+    return {
+        body(row) {
+            content.push(...row(tableRowBuilder)
+                .map((row) => row.build())
+                .filter((r) => r !== null));
+            return tableBuilder(content);
+        },
+        // --------------------------------------- //
+        build() {
+            return content.length ? buildTable(content.join("\n")) : null;
+        },
+        get() {
+            return content;
+        },
+        toString() {
+            // eslint-disable-next-line no-console
+            console.log(this.build);
+        }
+    };
+}
+exports["default"] = tableBuilder;
+
+
+/***/ }),
+
+/***/ 9894:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const decorators_1 = __importDefault(__nccwpck_require__(117));
+const common_1 = __nccwpck_require__(5155);
+const table_1 = __importDefault(__nccwpck_require__(3513));
+const details_1 = __importDefault(__nccwpck_require__(3755));
+function githubMessageBuilder(content = []) {
+    return {
         watermark(text) {
-            content.push(`<!-- ${text} -->`);
+            content.push((0, common_1.buildWatermark)(text));
             return githubMessageBuilder(content);
         },
         text(contentWithDecorators) {
-            content.push(createTextWithDecorator(contentWithDecorators));
+            content.push((0, decorators_1.default)(contentWithDecorators));
             return githubMessageBuilder(content);
         },
         h1(contentWithDecorators) {
-            content.push(`# ${createTextWithDecorator(contentWithDecorators)}`);
+            content.push((0, common_1.buildH1)((0, decorators_1.default)(contentWithDecorators)));
             return githubMessageBuilder(content);
         },
         h2(contentWithDecorators) {
-            content.push(`## ${createTextWithDecorator(contentWithDecorators)}`);
+            content.push((0, common_1.buildH2)((0, decorators_1.default)(contentWithDecorators)));
             return githubMessageBuilder(content);
         },
         h3(contentWithDecorators) {
-            content.push(`### ${createTextWithDecorator(contentWithDecorators)}`);
+            content.push((0, common_1.buildH3)((0, decorators_1.default)(contentWithDecorators)));
             return githubMessageBuilder(content);
         },
         h4(contentWithDecorators) {
-            content.push(`#### ${createTextWithDecorator(contentWithDecorators)}`);
+            content.push((0, common_1.buildH4)((0, decorators_1.default)(contentWithDecorators)));
             return githubMessageBuilder(content);
         },
         h5(contentWithDecorators) {
-            content.push(`##### ${createTextWithDecorator(contentWithDecorators)}`);
+            content.push((0, common_1.buildH5)((0, decorators_1.default)(contentWithDecorators)));
             return githubMessageBuilder(content);
         },
-        // TODO add multiline
         quote(contentWithDecorators) {
-            content.push(`<blockquote>${createTextWithDecorator(contentWithDecorators)}</blockquote>`);
+            content.push((0, common_1.buildQuote)((0, decorators_1.default)(contentWithDecorators)));
             return githubMessageBuilder(content);
         },
         codeBlock(code, language) {
-            content.push(["```", `${language}\n`, code, "\n```"].join(""));
+            content.push((0, common_1.buildCodeBlock)(code, language));
             return githubMessageBuilder(content);
         },
         hr() {
-            content.push("---");
+            content.push((0, common_1.buildHr)());
             return githubMessageBuilder(content);
         },
         br() {
-            content.push("<br/>");
+            content.push((0, common_1.buildBr)());
             return githubMessageBuilder(content);
         },
+        table(table) {
+            const t = table(table_1.default).build();
+            if (t) {
+                content.push(t);
+            }
+            return githubMessageBuilder(content);
+        },
+        details(details) {
+            const d = details(details_1.default).build();
+            if (d) {
+                content.push(d);
+            }
+            return githubMessageBuilder(content);
+        },
+        // --------------------------------------- //
         build() {
-            return content.join("\n\n");
+            return content.length ? content.join("\n\n") : null;
         },
         add(...contentToAdd) {
-            content.push(...contentToAdd);
+            const filteredContentToAdd = contentToAdd.filter((c) => c);
+            content.push(...filteredContentToAdd);
             return githubMessageBuilder(content);
         },
         get() {
@@ -641,7 +692,58 @@ function githubMessageBuilder(content = []) {
         }
     };
 }
-exports.githubMessageBuilder = githubMessageBuilder;
+exports["default"] = githubMessageBuilder;
+
+
+/***/ }),
+
+/***/ 5776:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.tableBuilder = exports.detailsBuilder = exports.textWithDecoratorBuilder = exports["default"] = void 0;
+var github_message_builder_1 = __nccwpck_require__(9894);
+Object.defineProperty(exports, "default", ({ enumerable: true, get: function () { return __importDefault(github_message_builder_1).default; } }));
+__exportStar(__nccwpck_require__(5155), exports);
+var decorators_1 = __nccwpck_require__(117);
+Object.defineProperty(exports, "textWithDecoratorBuilder", ({ enumerable: true, get: function () { return __importDefault(decorators_1).default; } }));
+__exportStar(__nccwpck_require__(117), exports);
+var details_1 = __nccwpck_require__(3755);
+Object.defineProperty(exports, "detailsBuilder", ({ enumerable: true, get: function () { return __importDefault(details_1).default; } }));
+__exportStar(__nccwpck_require__(3755), exports);
+var table_1 = __nccwpck_require__(3513);
+Object.defineProperty(exports, "tableBuilder", ({ enumerable: true, get: function () { return __importDefault(table_1).default; } }));
+__exportStar(__nccwpck_require__(3513), exports);
+__exportStar(__nccwpck_require__(3778), exports);
+
+
+/***/ }),
+
+/***/ 3778:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 /***/ }),
@@ -1070,6 +1172,13 @@ Object.defineProperty(exports, "summary", ({ enumerable: true, get: function () 
  */
 var summary_2 = __nccwpck_require__(1327);
 Object.defineProperty(exports, "markdownSummary", ({ enumerable: true, get: function () { return summary_2.markdownSummary; } }));
+/**
+ * Path exports
+ */
+var path_utils_1 = __nccwpck_require__(2981);
+Object.defineProperty(exports, "toPosixPath", ({ enumerable: true, get: function () { return path_utils_1.toPosixPath; } }));
+Object.defineProperty(exports, "toWin32Path", ({ enumerable: true, get: function () { return path_utils_1.toWin32Path; } }));
+Object.defineProperty(exports, "toPlatformPath", ({ enumerable: true, get: function () { return path_utils_1.toPlatformPath; } }));
 //# sourceMappingURL=core.js.map
 
 /***/ }),
@@ -1204,6 +1313,71 @@ class OidcClient {
 }
 exports.OidcClient = OidcClient;
 //# sourceMappingURL=oidc-utils.js.map
+
+/***/ }),
+
+/***/ 2981:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.toPlatformPath = exports.toWin32Path = exports.toPosixPath = void 0;
+const path = __importStar(__nccwpck_require__(1017));
+/**
+ * toPosixPath converts the given path to the posix form. On Windows, \\ will be
+ * replaced with /.
+ *
+ * @param pth. Path to transform.
+ * @return string Posix path.
+ */
+function toPosixPath(pth) {
+    return pth.replace(/[\\]/g, '/');
+}
+exports.toPosixPath = toPosixPath;
+/**
+ * toWin32Path converts the given path to the win32 form. On Linux, / will be
+ * replaced with \\.
+ *
+ * @param pth. Path to transform.
+ * @return string Win32 path.
+ */
+function toWin32Path(pth) {
+    return pth.replace(/[/]/g, '\\');
+}
+exports.toWin32Path = toWin32Path;
+/**
+ * toPlatformPath converts the given path to a platform-specific path. It does
+ * this by replacing instances of / and \ with the platform-specific path
+ * separator.
+ *
+ * @param pth The path to platformize.
+ * @return string The platform-specific path.
+ */
+function toPlatformPath(pth) {
+    return pth.replace(/[/\\]/g, path.sep);
+}
+exports.toPlatformPath = toPlatformPath;
+//# sourceMappingURL=path-utils.js.map
 
 /***/ }),
 
@@ -12464,6 +12638,218 @@ function wrappy (fn, cb) {
     return ret
   }
 }
+
+
+/***/ }),
+
+/***/ 9290:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.createCheck = void 0;
+const github = __importStar(__nccwpck_require__(5438));
+const core = __importStar(__nccwpck_require__(2186));
+function createCheck(client, name, headSha, status, conclusion, output) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const response = yield client.rest.checks.create(Object.assign(Object.assign({}, github.context.repo), { name, head_sha: headSha, status,
+            conclusion,
+            output }));
+        if (response.status === 201) {
+            core.info(`Status Check #${response.data.id} was created with response status ${response.status}.`);
+        }
+        else {
+            core.setFailed(`An error occurred trying to create Status Check. Error code: ${response.status}.`);
+        }
+    });
+}
+exports.createCheck = createCheck;
+
+
+/***/ }),
+
+/***/ 5784:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getCommentByMessagePrefix = exports.createComment = exports.updateComment = exports.getComments = void 0;
+const github = __importStar(__nccwpck_require__(5438));
+const core = __importStar(__nccwpck_require__(2186));
+function getComments(client, pullRequestNumber) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { data: comments } = yield client.rest.issues.listComments(Object.assign(Object.assign({}, github.context.repo), { issue_number: pullRequestNumber }));
+        return comments;
+    });
+}
+exports.getComments = getComments;
+function updateComment(client, commentId, message) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const response = yield client.rest.issues.updateComment(Object.assign(Object.assign({}, github.context.repo), { comment_id: commentId, body: message }));
+        if (response.status === 200) {
+            core.info(`Pull Request #${response.data.id} comment was updated.`);
+        }
+        else {
+            core.setFailed(`An error occurred trying to update Pull Request comment. Error code: ${response.status}.`);
+        }
+    });
+}
+exports.updateComment = updateComment;
+function createComment(client, pullRequestNumber, message) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const response = yield client.rest.issues.createComment(Object.assign(Object.assign({}, github.context.repo), { issue_number: pullRequestNumber, body: message }));
+        if (response.status === 201) {
+            core.info(`Pull Request #${response.data.id} comment was created.`);
+        }
+        else {
+            core.setFailed(`An error occurred trying to create Pull Request comment. Error code: ${response.status}.`);
+        }
+    });
+}
+exports.createComment = createComment;
+function getCommentByMessagePrefix(client, pullRequestNumber, messagePrefix) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const issueComments = yield getComments(client, pullRequestNumber);
+        core.info(`Finished getting comments for Pull Request #${pullRequestNumber}.`);
+        const comment = issueComments.find((c) => c.body && c.body.startsWith(messagePrefix));
+        if (comment) {
+            core.info(`A jest tests result comment was found.`);
+            return comment;
+        }
+        else {
+            core.info(`A jest tests result comment was not found.`);
+            return null;
+        }
+    });
+}
+exports.getCommentByMessagePrefix = getCommentByMessagePrefix;
+
+
+/***/ }),
+
+/***/ 5077:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CheckRunStatus = exports.CheckRunConclusion = exports.PullRequestFileStatus = void 0;
+var PullRequestFileStatus;
+(function (PullRequestFileStatus) {
+    PullRequestFileStatus["ADDED"] = "added";
+    PullRequestFileStatus["REMOVED"] = "removed";
+    PullRequestFileStatus["MODIFIED"] = "modified";
+    PullRequestFileStatus["RENAMED"] = "renamed";
+    PullRequestFileStatus["COPIED"] = "copied";
+    PullRequestFileStatus["CHANGED"] = "changed";
+    PullRequestFileStatus["UNCHANGED"] = "unchanged";
+})(PullRequestFileStatus = exports.PullRequestFileStatus || (exports.PullRequestFileStatus = {}));
+var CheckRunConclusion;
+(function (CheckRunConclusion) {
+    CheckRunConclusion["SUCCESS"] = "success";
+    CheckRunConclusion["FAILURE"] = "failure";
+    CheckRunConclusion["NEUTRAL"] = "neutral";
+    CheckRunConclusion["CANCELLED"] = "cancelled";
+    CheckRunConclusion["SKIPPED"] = "skipped";
+    CheckRunConclusion["TIME_OUT"] = "timed_out";
+    CheckRunConclusion["ACTION_REQUIRED"] = "action_required";
+})(CheckRunConclusion = exports.CheckRunConclusion || (exports.CheckRunConclusion = {}));
+var CheckRunStatus;
+(function (CheckRunStatus) {
+    CheckRunStatus["QUEUED"] = "queued";
+    CheckRunStatus["IN_PROGRESS"] = "in_progress";
+    CheckRunStatus["COMPLETED"] = "completed";
+})(CheckRunStatus = exports.CheckRunStatus || (exports.CheckRunStatus = {}));
+
+
+/***/ }),
+
+/***/ 239:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getParametersDescription = void 0;
+function getParametersDescription(parameters) {
+    function getMaxParameterNameLength() {
+        return Math.max(...Object.keys(parameters).map((name) => name.length));
+    }
+    const nameLength = getMaxParameterNameLength() + 2;
+    return [
+        "PARAMETERS",
+        "----------",
+        ...Object.keys(parameters).map((name) => `${name + " ".repeat(nameLength - name.length)}: ${parameters[name]}`),
+        "----------"
+    ].join("\n");
+}
+exports.getParametersDescription = getParametersDescription;
 
 
 /***/ }),

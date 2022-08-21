@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/JanSzewczyk/gh-action-szum-tech/compare/v1.5.0...v1.5.1) (2022-08-21)
+
+
+### Bug Fixes
+
+* **jest-test-result:** fix parameters description ([88d74c6](https://github.com/JanSzewczyk/gh-action-szum-tech/commit/88d74c67a6e15cf6973d6b3ffbcc1d19c054b341))
+
 # [1.5.0](https://github.com/JanSzewczyk/gh-action-szum-tech/compare/v1.4.0...v1.5.0) (2022-06-22)
 
 
