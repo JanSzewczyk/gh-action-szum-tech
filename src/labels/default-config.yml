@@ -61,6 +61,7 @@ labels:
     validation:
       any: ["package.json", "yarn.lock", "package-lock.json"]
 
+  # .github/pull_request_template.md test this -> should return true -> correct validation shouldn't
   - name: "documentation"
     color: "0075ca"
     description: "Improvements or additions to documentation"
