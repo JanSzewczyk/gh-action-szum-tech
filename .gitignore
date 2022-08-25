@@ -104,3 +104,6 @@ jest-results.json
 
 .vscode/
 .idea/
+
+# Ignore eslint results file
+eslint-result.json
