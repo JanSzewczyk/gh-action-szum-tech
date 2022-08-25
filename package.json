@@ -23,7 +23,7 @@
     "@types/dedent": "^0.7.0",
     "@types/jest": "^28.1.7",
     "@types/js-yaml": "^4.0.5",
-    "@types/minimatch": "^3.0.5",
+    "@types/minimatch": "^5.1.0",
     "@types/node": "^18.7.9",
     "@typescript-eslint/parser": "^5.33.1",
     "@vercel/ncc": "^0.34.0",
