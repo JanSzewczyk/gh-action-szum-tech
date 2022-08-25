@@ -13,7 +13,7 @@
   "devDependencies": {
     "@faker-js/faker": "^7.4.0",
     "@jackfranklin/test-data-bot": "^2.0.0",
-    "@octokit/types": "^6.39.0",
+    "@octokit/types": "^7.1.1",
     "@semantic-release/changelog": "^6.0.1",
     "@semantic-release/commit-analyzer": "^9.0.2",
     "@semantic-release/git": "^10.0.1",
