@@ -87,3 +87,33 @@ jobs:
         uses: ./jest-test-results
 #        with:
 #          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+  eslint-check-results:
+    name: Run eslint-check-results action  ️
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        node-version: [ 16.x ]
+        os: [ ubuntu-latest ]
+
+    steps:
+      - name: Checkout code 📚
+        uses: actions/checkout@v3
+
+      - name: Set up Node 🟢
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install packages ⚙️
+        run: yarn install --frozen-lockfile
+
+      - name: Build 🏗️  ️
+        run: yarn run prepare-release
+
+      - name: Run tests with results 🧹
+        run: yarn run lint:json
+        continue-on-error: true
+
+      - name: Run `eslint-check-results` action ▶️
+        uses: ./eslint-check-results

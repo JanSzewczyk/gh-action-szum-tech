@@ -26,7 +26,7 @@ jobs:
           yarn add eslint
           yarn add @microsoft/eslint-formatter-sarif
 
-      - name: Run ESLint
+      - name: Run ESLint 🧹
         run: yarn eslint "{**/*,*}.{js,ts}"
           --config .eslintrc.yml
           --max-warnings 0
