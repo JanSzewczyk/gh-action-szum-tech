@@ -29,6 +29,9 @@ export enum PullRequestFileStatus {
   UNCHANGED = "unchanged"
 }
 
+export type pullRequestReviewComment =
+  types.Endpoints["GET /repos/{owner}/{repo}/pulls/{pull_number}/comments"]["response"]["data"][0];
+
 export type User = types.Endpoints["GET /users/{username}"]["response"]["data"];
 export type SimpleUser = types.Endpoints["GET /users"]["response"]["data"][0];
 
