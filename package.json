@@ -13,6 +13,7 @@
   "devDependencies": {
     "@faker-js/faker": "^7.4.0",
     "@jackfranklin/test-data-bot": "^2.0.0",
+    "@microsoft/eslint-formatter-sarif": "^3.0.0",
     "@octokit/types": "^7.1.1",
     "@semantic-release/changelog": "^6.0.1",
     "@semantic-release/commit-analyzer": "^9.0.2",
@@ -49,9 +50,9 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "lint": "eslint . --ext .ts",
+    "lint": "eslint . --ext .ts,.js",
     "lint:fix": "eslint . --ext .ts,.js --fix",
-    "lint:json": "eslint . --ext .ts -o eslint-result.json -f json ",
+    "lint:results": "eslint . --ext .ts,.js -o eslint-results.sarif -f @microsoft/eslint-formatter-sarif --max-warnings 0",
     "package": "ncc build --source-map --license licenses.txt",
     "package:labels": "ncc build lib/labels/index.js --source-map -o dist/labels",
     "package:jest-test-results": "ncc build lib/jest-test-results/main.js --source-map -o dist/jest-test-results",

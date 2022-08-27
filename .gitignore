@@ -106,4 +106,4 @@ jest-results.json
 .idea/
 
 # Ignore eslint results file
-eslint-result.json
+eslint-results.sarif
