@@ -12,6 +12,11 @@ Fixes # (issue)
 - [ ] New feature (non-breaking change which adds functionality)
 - [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
 - [ ] This change requires a documentation update
+- [ ] Styles (formatting, missing semi colons, etc; no production code change)
+- [ ] Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
+- [ ] Changes that affect the build system or external dependencies (example scopes: gulp, broccoli, npm)
+- [ ] A code change that improves performance
+- [ ] Changes to our CI configuration files and scripts (example scopes: GitHub actions, Travis, Circle, BrowserStack, SauceLabs)
 
 # How Has This Been Tested?
 
