@@ -1,4 +1,4 @@
-export function getParametersDescription(parameters: Record<string, string | boolean>): string {
+export function getParametersDescription(parameters: Record<string, string | boolean | number | null> = {}): string {
   function getMaxParameterNameLength(): number {
     return Math.max(...Object.keys(parameters).map((name) => name.length));
   }
