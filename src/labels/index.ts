@@ -14,6 +14,7 @@ import {
 import { LabelConfiguration } from "./types";
 import { getDefaultConfiguration, getLabelsDifferences, getRepositoryLabelsDifference } from "./utils";
 import { validateLabel } from "./validation";
+import { getParametersDescription } from "@utils/utils";
 
 const defaultConfigPath = "./src/labels/default-config.yml";
 
@@ -21,14 +22,20 @@ export async function main(): Promise<void> {
   try {
     const githubToken = core.getInput("GITHUB_TOKEN", { required: true });
 
+    const octokit = github.getOctokit(githubToken);
+
+    core.info(
+      getParametersDescription({
+        GITHUB_TOKEN: githubToken
+      })
+    );
+
     const pullRequest = github.context.payload.pull_request as PullRequest;
 
     if (!pullRequest) {
       core.warning("Could not get pull request from context, exiting...");
       return;
     }
-
-    const octokit = github.getOctokit(githubToken);
 
     core.info(`Getting default label configuration....`);
     const defaultConfiguration = await getDefaultConfiguration(defaultConfigPath);
