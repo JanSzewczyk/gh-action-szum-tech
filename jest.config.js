@@ -12,6 +12,8 @@ module.exports = {
     "@services/(.*)": "<rootDir>/src/services/$1",
     "@tests/(.*)": "<rootDir>/src/tests/$1",
     "@types": "<rootDir>/src/types.ts",
-    "@utils/(.*)": "<rootDir>/src/utils/$1"
-  }
+    "@utils/(.*)": "<rootDir>/src/utils/$1",
+    "^lodash-es$": "<rootDir>/node_modules/lodash/index.js"
+  },
+  transformIgnorePatterns: ["<rootDir>/node_modules/(?!lodash-es/.*)"]
 };

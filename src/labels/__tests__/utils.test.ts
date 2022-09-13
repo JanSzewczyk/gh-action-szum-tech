@@ -1,8 +1,77 @@
-import { expect, test, describe } from "@jest/globals";
-import { filterFileNamesByPatterns, getLabelsDifferences, getPullRequestChangesReport } from "../utils";
+import * as core from "@actions/core";
+import { expect, test, describe, jest } from "@jest/globals";
+import {
+  checkIfConfigFileIsSupported,
+  filterFileNamesByPatterns,
+  getLabelsDifferences,
+  getPullRequestChangesReport,
+  isFileConfigurationCorrect
+} from "../utils";
 import { buildPullRequestFile } from "@tests/builders/file.builder";
 
-describe("Labels Action Utils", () => {
+jest.mock("@actions/core");
+
+describe("Actions > Labels > Utils", () => {
+  describe("checkIfConfigFileIsSupported()", () => {
+    test("should return 'false', when path is empty", () => {
+      const result = checkIfConfigFileIsSupported("");
+
+      expect(core.info).toHaveBeenCalledWith("Checking if the labels configuration file is supported...");
+      expect(core.error).toHaveBeenCalledWith("Labels configuration file path does not exist.");
+
+      expect(core.info).toHaveBeenCalledTimes(1);
+      expect(core.error).toHaveBeenCalledTimes(1);
+      expect(result).toBeFalsy();
+    });
+
+    test("should return 'false', when file extension is not supported", () => {
+      const result = checkIfConfigFileIsSupported("./some/path/to/file.js");
+
+      expect(core.info).toHaveBeenCalledWith("Checking if the labels configuration file is supported...");
+      expect(core.error).toHaveBeenCalledWith("Labels configuration file 'file.js' is not supported by action.");
+
+      expect(core.info).toHaveBeenCalledTimes(1);
+      expect(core.error).toHaveBeenCalledTimes(1);
+      expect(result).toBeFalsy();
+    });
+
+    test("should return 'true', when file extension is 'yml'", () => {
+      const result = checkIfConfigFileIsSupported("./some/path/to/file.yml");
+
+      expect(core.info).toHaveBeenCalledWith("Checking if the labels configuration file is supported...");
+      expect(core.info).toHaveBeenCalledWith("Labels configuration file 'file.yml' is supported by action.");
+
+      expect(core.info).toHaveBeenCalledTimes(2);
+      expect(result).toBeTruthy();
+    });
+
+    test("should return 'true', when file extension is 'yaml'", () => {
+      const result = checkIfConfigFileIsSupported("file.yaml");
+
+      expect(core.info).toHaveBeenCalledWith("Checking if the labels configuration file is supported...");
+      expect(core.info).toHaveBeenCalledWith("Labels configuration file 'file.yaml' is supported by action.");
+
+      expect(core.info).toHaveBeenCalledTimes(2);
+      expect(result).toBeTruthy();
+    });
+  });
+
+  describe("isFileConfigurationCorrect()", () => {
+    test("", () => {
+      const result = isFileConfigurationCorrect({ labels: [] });
+
+      expect(result).toBeTruthy();
+    });
+  });
+
+  describe("mergeConfigurations()", () => {
+    test("", () => {
+      const result = isFileConfigurationCorrect({ labels: [] });
+
+      expect(result).toBeTruthy();
+    });
+  });
+
   describe("getLabelsDifferences function", () => {
     const pullRequestLabels = [
       "label_1",

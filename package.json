@@ -24,6 +24,7 @@
     "@types/dedent": "^0.7.0",
     "@types/jest": "^28.1.8",
     "@types/js-yaml": "^4.0.5",
+    "@types/lodash-es": "^4.17.6",
     "@types/minimatch": "^5.1.0",
     "@types/node": "^18.7.13",
     "@typescript-eslint/parser": "^5.35.1",
@@ -43,8 +44,8 @@
   "dependencies": {
     "@actions/core": "^1.9.1",
     "@actions/github": "^5.0.3",
-    "dedent": "^0.7.0",
     "js-yaml": "^4.1.0",
+    "lodash-es": "^4.17.21",
     "minimatch": "^5.1.0"
   },
   "main": "lib/index.js",
@@ -61,6 +62,7 @@
     "prettier:write": "prettier --write .",
     "semantic-release": "semantic-release",
     "test": "jest",
-    "test:json": "jest --json --outputFile=jest-results.json"
+    "test:json": "jest --json --outputFile=jest-results.json",
+    "test:watch": "jest --watch"
   }
 }
