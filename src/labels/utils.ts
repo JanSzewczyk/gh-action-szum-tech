@@ -1,13 +1,82 @@
-import fs from "fs/promises";
+import * as fs from "fs";
+import * as core from "@actions/core";
 import yaml from "js-yaml";
-import { Configuration, LabelChangesReport, LabelConfiguration, PullRequestChangesReport } from "./types";
+import {
+  Configuration,
+  isConfiguration,
+  LabelChangesReport,
+  LabelConfiguration,
+  PullRequestChangesReport
+} from "./types";
 import { Label, PullRequestFile } from "@types";
 import minimatch from "minimatch";
+import { supportedConfigurationFilesExtensions } from "./constants";
+import { differenceBy } from "lodash-es";
 
-export async function getDefaultConfiguration(defaultConfigPath: string): Promise<Configuration> {
-  const yamlFile = await fs.readFile(defaultConfigPath, "utf8");
+export function checkIfConfigFileIsSupported(configPath: string): boolean {
+  core.info("Checking if the labels configuration file is supported...");
 
-  return yaml.load(yamlFile) as Configuration;
+  if (!configPath) {
+    core.error("Labels configuration file path does not exist.");
+    return false;
+  }
+
+  const pathArray = configPath.split("/");
+  const configFileName = pathArray[pathArray.length - 1];
+
+  const result = supportedConfigurationFilesExtensions.some((fileExtension) =>
+    minimatch(configFileName, `*.${fileExtension}`)
+  );
+
+  if (result) {
+    core.info(`Labels configuration file '${configFileName}' is supported by action.`);
+  } else {
+    core.error(`Labels configuration file '${configFileName}' is not supported by action.`);
+  }
+
+  return result;
+}
+
+// TODO TEST
+export function readConfigurationFile(fileName: string): unknown {
+  core.info("Reading labels configuration from file...");
+
+  if (fs.existsSync(fileName)) {
+    const raw = fs.readFileSync(fileName, "utf8");
+
+    if (!raw) {
+      core.error(`The label configuration file '${fileName}' does not contain any data.`);
+      return null;
+    }
+
+    core.info(`The label configuration file '${fileName}' has been loaded successfully.`);
+    return yaml.load(raw);
+  } else {
+    core.error(`The label configuration file '${fileName}' does not exists.`);
+    return null;
+  }
+}
+
+// TODO TEST
+export function isFileConfigurationCorrect(config: unknown): Configuration | false {
+  core.info("Checking custom configuration correctness...");
+
+  if (isConfiguration(config)) {
+    core.info("Custom configuration is correct.");
+    return config;
+  }
+
+  core.error("Custom configuration is correct.");
+  return false;
+}
+
+// TODO TEST
+export function mergeConfigurations(
+  baseConfig: LabelConfiguration[],
+  newConfig: LabelConfiguration[]
+): LabelConfiguration[] {
+  const baseConfigWithoutOverwrittenLabels = differenceBy(baseConfig, newConfig, "name");
+  return [...baseConfigWithoutOverwrittenLabels, ...newConfig];
 }
 
 export function getRepositoryLabelsDifference(

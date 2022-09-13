@@ -1,7 +1,7 @@
 import * as github from "@actions/github";
 import * as core from "@actions/core";
 
-import { PullRequest, OctokitClient, PullRequestFile } from "@types";
+import { OctokitClient, PullRequestFile } from "@types";
 import { getPullRequestFiles } from "@services/pull";
 import {
   addLabelsToPullRequest,
@@ -11,52 +11,111 @@ import {
   removeLabelFromPullRequest,
   updateLabel
 } from "@services/label";
-import { LabelConfiguration } from "./types";
-import { getDefaultConfiguration, getLabelsDifferences, getRepositoryLabelsDifference } from "./utils";
+import { Configuration, LabelConfiguration } from "./types";
+import {
+  checkIfConfigFileIsSupported,
+  getLabelsDifferences,
+  getRepositoryLabelsDifference,
+  isFileConfigurationCorrect,
+  mergeConfigurations,
+  readConfigurationFile
+} from "./utils";
 import { validateLabel } from "./validation";
 import { getParametersDescription } from "@utils/utils";
-
-const defaultConfigPath = "./src/labels/default-config.yml";
+import { defaultConfiguration } from "./constants";
+import { orderBy } from "lodash-es";
 
 export async function main(): Promise<void> {
   try {
-    const githubToken = core.getInput("GITHUB_TOKEN", { required: true });
+    const githubToken = core.getInput("GITHUB_TOKEN", { required: false, trimWhitespace: true });
+    const customConfigPath = core.getInput("CUSTOM_CONFIG_PATH", { required: false, trimWhitespace: true }) || null;
+    const disableDefaultConfig = core.getBooleanInput("DISABLE_DEFAULT_CONFIG", { required: false });
 
     const octokit = github.getOctokit(githubToken);
 
     core.info(
       getParametersDescription({
-        GITHUB_TOKEN: githubToken
+        GITHUB_TOKEN: githubToken,
+        CUSTOM_CONFIG_PATH: customConfigPath,
+        DISABLE_DEFAULT_CONFIG: disableDefaultConfig
       })
     );
 
-    const pullRequest = github.context.payload.pull_request as PullRequest;
-
-    if (!pullRequest) {
-      core.warning("Could not get pull request from context, exiting...");
+    if (github.context.eventName !== "pull_request") {
+      core.info("This event was not triggered by a `pull_request` event. No comment will be created or updated.");
       return;
     }
 
-    core.info(`Getting default label configuration....`);
-    const defaultConfiguration = await getDefaultConfiguration(defaultConfigPath);
-    core.info(`Successfully get label configuration with ${defaultConfiguration.labels.length} label(s)`);
+    const pullRequestNumber = github.context.payload.pull_request?.number as number;
+
+    const configuration = getLabelConfiguration(customConfigPath, disableDefaultConfig);
+    core.info(`Successfully get label configuration with ${configuration.length} label(s).`);
 
     core.info("\nSync Repository labels...");
     await syncRepositoryLabels(octokit, defaultConfiguration.labels);
 
     core.info("\nGetting Pull Request Files...");
-    const changedFiles = await getPullRequestFiles(octokit, pullRequest.number);
+    const changedFiles = await getPullRequestFiles(octokit, pullRequestNumber);
 
     core.info("\nDetecting Pull Request Labels...");
     const detectedLabels = definePullRequestLabels(defaultConfiguration.labels, changedFiles);
 
     core.info("\nSync Pull Request labels...");
-    await syncPullRequestLabels(octokit, pullRequest.number, detectedLabels, defaultConfiguration.labels);
+    await syncPullRequestLabels(octokit, pullRequestNumber, detectedLabels, defaultConfiguration.labels);
   } catch (error) {
     if (error instanceof Error) {
       core.error(error);
       core.setFailed(error.message);
     }
+  }
+}
+
+export function getLabelConfiguration(
+  customConfigurationPath: string | null,
+  disableDefaultConfig: boolean
+): LabelConfiguration[] {
+  core.info(`Getting labels configuration....`);
+
+  const defaultConfig: Configuration = defaultConfiguration;
+  let customConfig: Configuration | null = null;
+
+  if (customConfigurationPath) {
+    core.info(`Custom label configuration is supported.`);
+    core.info(`Getting custom labels configuration from file '${customConfigurationPath}'...`);
+
+    const isFileNameSupported = checkIfConfigFileIsSupported(customConfigurationPath);
+
+    if (isFileNameSupported) {
+      const rawConfig = readConfigurationFile(customConfigurationPath);
+      const config = isFileConfigurationCorrect(rawConfig);
+
+      if (config) {
+        customConfig = config;
+      }
+    }
+
+    if (!isFileNameSupported || !customConfig) {
+      if (disableDefaultConfig) {
+        core.setFailed(
+          "Custom labels configuration file is not supported by an action and DEFAULT configuration is disabled. No label will be changed."
+        );
+      } else {
+        core.warning(
+          "Custom labels configuration file is not supported by an action. DEFAULT labels configuration will be used."
+        );
+      }
+    }
+  }
+
+  if (!disableDefaultConfig) {
+    if (customConfig !== null) {
+      //merge config with custom config
+      return orderBy(mergeConfigurations(defaultConfig.labels, customConfig.labels), ["name"]);
+    } else {
+      return orderBy(defaultConfig.labels, ["name"]);
+    }
+  } else {
+    return customConfig !== null ? orderBy(customConfig.labels, ["name"]) : [];
   }
 }
 
