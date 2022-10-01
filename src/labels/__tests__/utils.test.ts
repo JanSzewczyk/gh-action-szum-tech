@@ -5,9 +5,30 @@ import {
   filterFileNamesByPatterns,
   getLabelsDifferences,
   getPullRequestChangesReport,
-  isFileConfigurationCorrect
+  isFileConfigurationCorrect,
+  readConfigurationFile
 } from "../utils";
 import { buildPullRequestFile } from "@tests/builders/file.builder";
+import { buildConfiguration } from "@tests/builders/label-configuration.builder";
+
+const LABEL_CONFIGURATION = buildConfiguration()();
+
+const PATH_TO_NOT_EXISTED_FILE = "/path/to/not/existed/file.yml";
+const PATH_TO_EMPTY_FILE = "/path/to/empty/file.yml";
+const PATH_TO_CORRECT_FILE = "/path/to/correct/file.yml";
+
+const MOCK_FILE_INFO: Record<string, string> = {
+  [PATH_TO_EMPTY_FILE]: "",
+  [PATH_TO_CORRECT_FILE]: JSON.stringify(LABEL_CONFIGURATION)
+};
+
+jest.mock("fs", () => ({
+  promises: {
+    access: jest.fn()
+  },
+  readFileSync: (path: string) => MOCK_FILE_INFO[path] ?? null,
+  existsSync: (fileName: string) => [PATH_TO_EMPTY_FILE, PATH_TO_CORRECT_FILE].includes(fileName)
+}));
 
 jest.mock("@actions/core");
 
@@ -53,6 +74,46 @@ describe("Actions > Labels > Utils", () => {
 
       expect(core.info).toHaveBeenCalledTimes(2);
       expect(result).toBeTruthy();
+    });
+  });
+
+  describe("readConfigurationFile()", () => {
+    test("should return null when file not exists", () => {
+      const result = readConfigurationFile(PATH_TO_NOT_EXISTED_FILE);
+
+      expect(core.info).toHaveBeenCalledWith("Reading labels configuration from file...");
+      expect(core.error).toHaveBeenCalledWith(
+        `The label configuration file '${PATH_TO_NOT_EXISTED_FILE}' does not exists.`
+      );
+      expect(core.info).toHaveBeenCalledTimes(1);
+      expect(core.error).toHaveBeenCalledTimes(1);
+
+      expect(result).toBeNull();
+    });
+
+    test("should return null when file is empty", () => {
+      const response = readConfigurationFile(PATH_TO_EMPTY_FILE);
+
+      expect(core.info).toHaveBeenCalledWith("Reading labels configuration from file...");
+      expect(core.error).toHaveBeenCalledWith(
+        `The label configuration file '${PATH_TO_EMPTY_FILE}' does not contain any data.`
+      );
+      expect(core.info).toHaveBeenCalledTimes(1);
+      expect(core.error).toHaveBeenCalledTimes(1);
+
+      expect(response).toBeNull();
+    });
+
+    test("should return raw configuration when file contain content", () => {
+      const response = readConfigurationFile(PATH_TO_CORRECT_FILE);
+
+      expect(core.info).toHaveBeenCalledWith("Reading labels configuration from file...");
+      expect(core.info).toHaveBeenCalledWith(
+        `The label configuration file '${PATH_TO_CORRECT_FILE}' has been loaded successfully.`
+      );
+      expect(core.info).toHaveBeenCalledTimes(2);
+
+      expect(response).toEqual(LABEL_CONFIGURATION);
     });
   });
 

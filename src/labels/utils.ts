@@ -37,7 +37,6 @@ export function checkIfConfigFileIsSupported(configPath: string): boolean {
   return result;
 }
 
-// TODO TEST
 export function readConfigurationFile(fileName: string): unknown {
   core.info("Reading labels configuration from file...");
 

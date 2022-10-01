@@ -42,7 +42,7 @@ export async function main(): Promise<void> {
     );
 
     if (github.context.eventName !== "pull_request") {
-      core.info("This event was not triggered by a `pull_request` event. No comment will be created or updated.");
+      core.info("This event was not triggered by a `pull_request` event. No label will be updated.");
       return;
     }
 
@@ -109,14 +109,20 @@ export function getLabelConfiguration(
 
   if (!disableDefaultConfig) {
     if (customConfig !== null) {
-      //merge config with custom config
+      core.info(`The source of labels configuration is configuration created from DEFAULT and CUSTOM configuration.`);
       return orderBy(mergeConfigurations(defaultConfig.labels, customConfig.labels), ["name"]);
     } else {
+      core.info(`The source of labels configuration is the only default configuration.`);
       return orderBy(defaultConfig.labels, ["name"]);
     }
   } else {
-    return customConfig !== null ? orderBy(customConfig.labels, ["name"]) : [];
+    if (customConfig !== null) {
+      core.info(`The source of labels configuration is the only CUSTOM configuration.`);
+      return orderBy(customConfig.labels, ["name"]);
+    }
   }
+
+  return [];
 }
 
 async function syncRepositoryLabels(
