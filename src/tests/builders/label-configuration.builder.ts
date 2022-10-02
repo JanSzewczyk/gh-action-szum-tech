@@ -27,7 +27,9 @@ export function buildLabelConfiguration(): ReturnBuilderFunction<LabelConfigurat
       color: sequence(() => faker.color.rgb()),
       description: sequence(() => faker.lorem.sentence()),
       name: sequence(() => faker.word.noun()),
-      validation: undefined
+      validation: {
+        any: ["dfsdsdf"]
+      }
     }
   });
 }

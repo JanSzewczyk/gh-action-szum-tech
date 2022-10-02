@@ -53,74 +53,115 @@ export function isConfiguration(configuration: unknown): configuration is Config
   }
 
   for (const labelConfig of config.labels) {
-    if (typeof labelConfig !== "object") {
-      return false;
-    }
-    const labelConfigFields = Object.keys(labelConfig);
-
-    if (
-      difference(labelConfigFields, ["name", "color", "description", "validation"]).length !== 0 ||
-      intersection(labelConfigFields, ["name", "color"]).length !== 2 ||
-      !labelConfig?.name ||
-      typeof labelConfig.name !== "string" ||
-      !labelConfig?.description ||
-      typeof labelConfig.description !== "string" ||
-      !labelConfig?.validation ||
-      labelConfig?.validation !== "object"
-    ) {
+    if (!isLabelConfiguration(labelConfig)) {
       return false;
     }
 
-    const labelConfigValidationFields = Object.keys(labelConfig.validation);
-    if (
-      difference(labelConfigValidationFields, ["ignoreFiles", "any", "every", "changes", "additions", "deletions"])
-        .length !== 0
-    ) {
-      return false;
-    }
+    // if (typeof labelConfig !== "object") {
+    //   return false;
+    // }
+    // const labelConfigFields = Object.keys(labelConfig);
+    //
+    // console.log(labelConfig.validation);
 
-    for (const stringArrayField of ["ignoreFiles", "any", "every"]) {
-      const value = labelConfig.validation[stringArrayField as keyof LabelValidation];
+    // if (
+    //   difference(labelConfigFields, ["name", "color", "description", "validation"]).length !== 0 ||
+    //   intersection(labelConfigFields, ["name", "color"]).length !== 2 ||
+    //   !labelConfig?.name ||
+    //   typeof labelConfig.name !== "string" ||
+    //   !labelConfig?.description ||
+    //   typeof labelConfig.description !== "string" ||
+    //   !labelConfig?.validation ||
+    //   labelConfig?.validation !== "object"
+    // ) {
+    //   return false;
+    // }
 
-      if (value && !Array.isArray(value)) {
-        return false;
-      }
-    }
+    // const labelConfigValidationFields = Object.keys(labelConfig.validation);
+    // if (
+    //   difference(labelConfigValidationFields, ["ignoreFiles", "any", "every", "changes", "additions", "deletions"])
+    //     .length !== 0
+    // ) {
+    //   return false;
+    // }
 
-    for (const objectField of ["changes", "additions", "deletions"]) {
-      const value = labelConfig.validation[objectField as keyof LabelValidation];
-      if (value !== undefined && !isLabelSizeValidation(value)) {
-        return false;
-      }
-    }
+    // for (const stringArrayField of ["ignoreFiles", "any", "every"]) {
+    //   const value = labelConfig.validation[stringArrayField as keyof LabelValidation];
+    //
+    //   if (value && !Array.isArray(value)) {
+    //     return false;
+    //   }
+    // }
+
+    // for (const objectField of ["changes", "additions", "deletions"]) {
+    //   const value = labelConfig.validation[objectField as keyof LabelValidation];
+    //   if (value !== undefined && !isLabelSizeValidation(value)) {
+    //     return false;
+    //   }
+    // }
   }
 
   return true;
 }
 
-function isLabelSizeValidation(labelSizeValidation: unknown): labelSizeValidation is LabelSizeValidation {
-  if (typeof labelSizeValidation !== "object") {
+function isLabelConfiguration(labelConfiguration: unknown): labelConfiguration is LabelConfiguration {
+  if (typeof labelConfiguration !== "object" || labelConfiguration === null) {
     return false;
   }
-  const config = labelSizeValidation as LabelSizeValidation;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const labelConfig = labelConfiguration as any;
 
-  const labelSizeValidationTypes = [
-    LabelSizeValidationType.LESS,
-    LabelSizeValidationType.GREATER,
-    LabelSizeValidationType.LESS_OR_EQUAL,
-    LabelSizeValidationType.GREATER_OR_EQUAL,
-    LabelSizeValidationType.EQUAL
-  ];
-
-  if (difference(Object.keys(config), labelSizeValidationTypes).length !== 0) {
+  const labelConfigFields = Object.keys(labelConfig);
+  if (
+    difference(labelConfigFields, ["name", "color", "description", "validation"]).length !== 0 ||
+    intersection(labelConfigFields, ["name", "color", "description"]).length !== 3
+  ) {
     return false;
   }
 
-  for (const sizeValidationType of labelSizeValidationTypes) {
-    if (config[sizeValidationType] && typeof config[sizeValidationType] !== "number") {
-      return false;
-    }
+  if (
+    !labelConfig.name ||
+    typeof labelConfig.name !== "string" ||
+    !labelConfig.color ||
+    typeof labelConfig.color !== "string" ||
+    !labelConfig.description ||
+    typeof labelConfig.description !== "string" ||
+    (labelConfig.validation && !isLabelValidation(labelConfig.validation))
+  ) {
+    return false;
   }
 
   return true;
 }
+
+// TODO complete mee please !!!
+function isLabelValidation(labelValidation: unknown): labelValidation is LabelValidation {
+  return true;
+}
+
+// function isLabelSizeValidation(labelSizeValidation: unknown): labelSizeValidation is LabelSizeValidation {
+//   if (typeof labelSizeValidation !== "object") {
+//     return false;
+//   }
+//   const config = labelSizeValidation as LabelSizeValidation;
+//
+//   const labelSizeValidationTypes = [
+//     LabelSizeValidationType.LESS,
+//     LabelSizeValidationType.GREATER,
+//     LabelSizeValidationType.LESS_OR_EQUAL,
+//     LabelSizeValidationType.GREATER_OR_EQUAL,
+//     LabelSizeValidationType.EQUAL
+//   ];
+//
+//   if (difference(Object.keys(config), labelSizeValidationTypes).length !== 0) {
+//     return false;
+//   }
+//
+//   for (const sizeValidationType of labelSizeValidationTypes) {
+//     if (config[sizeValidationType] && typeof config[sizeValidationType] !== "number") {
+//       return false;
+//     }
+//   }
+//
+//   return true;
+// }

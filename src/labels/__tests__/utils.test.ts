@@ -118,10 +118,22 @@ describe("Actions > Labels > Utils", () => {
   });
 
   describe("isFileConfigurationCorrect()", () => {
-    test("", () => {
-      const result = isFileConfigurationCorrect({ labels: [] });
+    test("should return configuration, when it is correct", () => {
+      expect(isFileConfigurationCorrect(LABEL_CONFIGURATION)).toEqual(LABEL_CONFIGURATION);
+    });
 
-      expect(result).toBeTruthy();
+    test("should return 'false', when  configuration is not correct", () => {
+      expect(
+        isFileConfigurationCorrect({
+          labels: [
+            {
+              name: ""
+            }
+          ]
+        })
+      ).toBeFalsy();
+      expect(isFileConfigurationCorrect("")).toBeFalsy();
+      expect(isFileConfigurationCorrect({ some: [] })).toBeFalsy();
     });
   });
 

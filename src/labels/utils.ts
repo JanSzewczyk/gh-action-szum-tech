@@ -56,7 +56,6 @@ export function readConfigurationFile(fileName: string): unknown {
   }
 }
 
-// TODO TEST
 export function isFileConfigurationCorrect(config: unknown): Configuration | false {
   core.info("Checking custom configuration correctness...");
 
