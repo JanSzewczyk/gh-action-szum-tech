@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        node-version: [14.x, 16.x]
+        node-version: [16.x]
         os: [ubuntu-latest, windows-latest]
 
     steps:
@@ -28,3 +28,13 @@ jobs:
 
       - name: Run tests 🧪
         run: yarn run test
+        continue-on-error: true
+
+      - name: Run tests with results 🧪
+        run: yarn run test:json
+        continue-on-error: true
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: ./
