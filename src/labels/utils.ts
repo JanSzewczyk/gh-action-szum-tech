@@ -68,7 +68,6 @@ export function isFileConfigurationCorrect(config: unknown): Configuration | fal
   return false;
 }
 
-// TODO TEST
 export function mergeConfigurations(
   baseConfig: LabelConfiguration[],
   newConfig: LabelConfiguration[]
