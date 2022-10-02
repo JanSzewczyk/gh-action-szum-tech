@@ -87,10 +87,13 @@ export function getLabelConfiguration(
 
     if (isFileNameSupported) {
       const rawConfig = readConfigurationFile(customConfigurationPath);
-      const config = isFileConfigurationCorrect(rawConfig);
 
-      if (config) {
-        customConfig = config;
+      if (rawConfig) {
+        const config = isFileConfigurationCorrect(rawConfig);
+
+        if (config) {
+          customConfig = config;
+        }
       }
     }
 
@@ -112,7 +115,7 @@ export function getLabelConfiguration(
       core.info(`The source of labels configuration is configuration created from DEFAULT and CUSTOM configuration.`);
       return orderBy(mergeConfigurations(defaultConfig.labels, customConfig.labels), ["name"]);
     } else {
-      core.info(`The source of labels configuration is the only default configuration.`);
+      core.info(`The source of labels configuration is the only DEFAULT configuration.`);
       return orderBy(defaultConfig.labels, ["name"]);
     }
   } else {
