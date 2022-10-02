@@ -6,10 +6,12 @@ import {
   getLabelsDifferences,
   getPullRequestChangesReport,
   isFileConfigurationCorrect,
+  mergeConfigurations,
   readConfigurationFile
 } from "../utils";
 import { buildPullRequestFile } from "@tests/builders/file.builder";
-import { buildConfiguration } from "@tests/builders/label-configuration.builder";
+import { buildConfiguration, buildLabelConfiguration } from "@tests/builders/label-configuration.builder";
+import { isEqual, xor } from "lodash-es";
 
 const LABEL_CONFIGURATION = buildConfiguration()();
 
@@ -138,10 +140,96 @@ describe("Actions > Labels > Utils", () => {
   });
 
   describe("mergeConfigurations()", () => {
-    test("", () => {
-      const result = isFileConfigurationCorrect({ labels: [] });
+    const baseLabelConfigLabels = ["label_1", "label_2", "label_3", "label_4", "label_5"];
+    const baseLabelConfig = baseLabelConfigLabels.map((labelName) =>
+      buildLabelConfiguration()({
+        overrides: {
+          name: labelName
+        }
+      })
+    );
 
-      expect(result).toBeTruthy();
+    test("should return empty array, when 'baseConfig' and 'newConfig' are empty", () => {
+      const result = mergeConfigurations([], []);
+      expect(result).toEqual([]);
+    });
+
+    test("should return 'newConfig', when 'baseConfig' is empty", () => {
+      const result = mergeConfigurations([], baseLabelConfig);
+
+      expect(result.length).toEqual(5);
+      expect(
+        xor(
+          result.map((labelConfig) => labelConfig.name),
+          baseLabelConfigLabels
+        ).length
+      ).toEqual(0);
+    });
+
+    test("should return 'baseConfig', when 'newConfig' is empty", () => {
+      const result = mergeConfigurations(baseLabelConfig, []);
+
+      expect(result.length).toEqual(5);
+      expect(
+        xor(
+          result.map((labelConfig) => labelConfig.name),
+          baseLabelConfigLabels
+        ).length
+      ).toEqual(0);
+    });
+
+    test("should return config array, when merging 'baseConfig' with 'newConfig'", () => {
+      const newLabelConfigLabels = ["label_6", "label_7"];
+      const newLabelConfig = newLabelConfigLabels.map((labelName) =>
+        buildLabelConfiguration()({
+          overrides: {
+            name: labelName
+          }
+        })
+      );
+
+      const result = mergeConfigurations(baseLabelConfig, newLabelConfig);
+
+      expect(result.length).toEqual(7);
+      expect(
+        xor(
+          result.map((labelConfig) => labelConfig.name),
+          [...baseLabelConfigLabels, ...newLabelConfigLabels]
+        ).length
+      ).toEqual(0);
+    });
+
+    test("should return array with overwritten configurations, when merging 'baseConfig' with 'newConfig'", () => {
+      const newLabelConfigLabels = ["label_4", "label_1", "label_6"];
+      const newLabelConfig = newLabelConfigLabels.map((labelName) =>
+        buildLabelConfiguration()({
+          overrides: {
+            name: labelName
+          }
+        })
+      );
+
+      const result = mergeConfigurations(baseLabelConfig, newLabelConfig);
+
+      expect(result.length).toEqual(6);
+      expect(
+        xor(
+          result.map((labelConfig) => labelConfig.name),
+          [...baseLabelConfigLabels, "label_6"]
+        ).length
+      ).toEqual(0);
+      expect(
+        isEqual(
+          result.find((c) => c.name === "label_1"),
+          newLabelConfig.find((c) => c.name === "label_1")
+        )
+      ).toBeTruthy();
+      expect(
+        isEqual(
+          result.find((c) => c.name === "label_4"),
+          newLabelConfig.find((c) => c.name === "label_4")
+        )
+      ).toBeTruthy();
     });
   });
 
