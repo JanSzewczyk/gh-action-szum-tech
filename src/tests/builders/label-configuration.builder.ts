@@ -12,6 +12,17 @@ export function buildConfiguration(): ReturnBuilderFunction<Configuration> {
         .map(() => buildLabelConfiguration()())
     },
     traits: {
+      defineLabels: {
+        overrides: {
+          labels: ["label_1", "label_2", "label_3", "label_4", "label_5"].map((labelName) =>
+            buildLabelConfiguration()({
+              overrides: {
+                name: labelName
+              }
+            })
+          )
+        }
+      },
       noLabels: {
         overrides: {
           labels: []

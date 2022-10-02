@@ -37,7 +37,7 @@ export function checkIfConfigFileIsSupported(configPath: string): boolean {
   return result;
 }
 
-export function readConfigurationFile(fileName: string): unknown {
+export function readConfigurationFile(fileName: string): unknown | null {
   core.info("Reading labels configuration from file...");
 
   if (fs.existsSync(fileName)) {

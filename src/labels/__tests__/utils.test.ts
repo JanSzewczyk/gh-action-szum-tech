@@ -233,7 +233,7 @@ describe("Actions > Labels > Utils", () => {
     });
   });
 
-  describe("getLabelsDifferences function", () => {
+  describe("getLabelsDifferences()", () => {
     const pullRequestLabels = [
       "label_1",
       "label_2",
@@ -272,7 +272,7 @@ describe("Actions > Labels > Utils", () => {
     });
   });
 
-  describe("getPullRequestChangesReport function", () => {
+  describe("getPullRequestChangesReport()", () => {
     const fileBuilder = buildPullRequestFile();
 
     test("should return pull request changes report", () => {
@@ -314,7 +314,7 @@ describe("Actions > Labels > Utils", () => {
     });
   });
 
-  describe("filterFileNamesByPatterns function", () => {
+  describe("filterFileNamesByPatterns()", () => {
     const fileNames: string[] = [
       "package.json",
       "some-file.ts",
