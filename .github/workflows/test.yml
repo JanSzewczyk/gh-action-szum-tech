@@ -28,13 +28,3 @@ jobs:
 
       - name: Run tests 🧪
         run: yarn run test
-        continue-on-error: true
-
-      - name: Run tests with results 🧪
-        run: yarn run test:json
-        continue-on-error: true
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
-        with:
-          path: ./
