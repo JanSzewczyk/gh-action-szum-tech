@@ -4,6 +4,8 @@ import * as core from "@actions/core";
 import { defaultConfiguration } from "../constants";
 import { buildConfiguration } from "@tests/builders/label-configuration.builder";
 
+jest.mock("@actions/core");
+
 const LABEL_CONFIGURATION = buildConfiguration()({ traits: "defineLabels" });
 
 const PATH_TO_NOT_EXISTED_FILE = "/path/to/not/existed/file.yml";
@@ -22,9 +24,6 @@ jest.mock("fs", () => ({
   readFileSync: (path: string) => MOCK_FILE_INFO[path] ?? null,
   existsSync: (fileName: string) => [PATH_TO_EMPTY_FILE, PATH_TO_CORRECT_FILE].includes(fileName)
 }));
-
-jest.mock("@actions/core");
-jest.mock("@actions/github");
 
 describe("Jest Test Results Action", () => {
   describe("getLabelConfiguration()", () => {
