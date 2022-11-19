@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/JanSzewczyk/gh-action-szum-tech/compare/v1.5.1...v1.6.0) (2022-11-19)
+
+
+### Features
+
+* **labels:** improve getting labels configuration mechanism ([553cadb](https://github.com/JanSzewczyk/gh-action-szum-tech/commit/553cadb2bd1de01de335b20a445fcca9e046ccaf))
+
 ## [1.5.1](https://github.com/JanSzewczyk/gh-action-szum-tech/compare/v1.5.0...v1.5.1) (2022-08-21)
 
 
