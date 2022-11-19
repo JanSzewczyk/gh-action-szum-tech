@@ -29,7 +29,7 @@ jest.mock("fs", () => ({
     access: jest.fn()
   },
   readFileSync: (path: string) => MOCK_FILE_INFO[path] ?? null,
-  existsSync: (fileName: string) => [PATH_TO_EMPTY_FILE, PATH_TO_CORRECT_FILE].includes(fileName)
+  existsSync: (fileName: string) => [PATH_TO_CORRECT_FILE, PATH_TO_EMPTY_FILE].includes(fileName)
 }));
 
 jest.mock("@actions/core");
