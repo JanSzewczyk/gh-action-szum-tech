@@ -8,13 +8,9 @@ jest.mock("@actions/core");
 
 const LABEL_CONFIGURATION = buildConfiguration()({ traits: "defineLabels" });
 
-const PATH_TO_NOT_EXISTED_FILE = "/path/to/not/existed/file.yml";
-const PATH_TO_EMPTY_FILE = "/path/to/empty/file.yml";
-const PATH_TO_CORRECT_FILE = "/path/to/correct/file.yml";
-
 const MOCK_FILE_INFO: Record<string, string> = {
-  [PATH_TO_EMPTY_FILE]: "",
-  [PATH_TO_CORRECT_FILE]: JSON.stringify(LABEL_CONFIGURATION)
+  "/path/to/empty/file.yml": "",
+  "/path/to/correct/file.yml": JSON.stringify(LABEL_CONFIGURATION)
 };
 
 jest.mock("fs", () => ({
@@ -22,7 +18,7 @@ jest.mock("fs", () => ({
     access: jest.fn()
   },
   readFileSync: (path: string) => MOCK_FILE_INFO[path] ?? null,
-  existsSync: (fileName: string) => [PATH_TO_EMPTY_FILE, PATH_TO_CORRECT_FILE].includes(fileName)
+  existsSync: (fileName: string) => ["/path/to/empty/file.yml", "/path/to/correct/file.yml"].includes(fileName)
 }));
 
 describe("Jest Test Results Action", () => {
@@ -38,18 +34,18 @@ describe("Jest Test Results Action", () => {
     });
 
     test("should return default configuration, when set custom configuration file that not exist", () => {
-      const labelConfiguration = getLabelConfiguration(PATH_TO_NOT_EXISTED_FILE, false);
+      const labelConfiguration = getLabelConfiguration("/path/to/not/existed/file.yml", false);
 
       expect(core.info).toHaveBeenCalledWith(`Getting labels configuration....`);
       expect(core.info).toHaveBeenCalledWith(`Custom label configuration is supported.`);
       expect(core.info).toHaveBeenCalledWith(
-        `Getting custom labels configuration from file '${PATH_TO_NOT_EXISTED_FILE}'...`
+        `Getting custom labels configuration from file '/path/to/not/existed/file.yml'...`
       );
       expect(core.info).toHaveBeenCalledWith("Checking if the labels configuration file is supported...");
       expect(core.info).toHaveBeenCalledWith(`Labels configuration file 'file.yml' is supported by action.`);
       expect(core.info).toHaveBeenCalledWith("Reading labels configuration from file...");
       expect(core.error).toHaveBeenCalledWith(
-        `The label configuration file '${PATH_TO_NOT_EXISTED_FILE}' does not exists.`
+        `The label configuration file '/path/to/not/existed/file.yml' does not exists.`
       );
       expect(core.warning).toHaveBeenCalledWith(
         "Custom labels configuration file is not supported by an action. DEFAULT labels configuration will be used."
@@ -64,18 +60,18 @@ describe("Jest Test Results Action", () => {
     });
 
     test("should return default configuration, when set custom configuration file that is empty", () => {
-      const labelConfiguration = getLabelConfiguration(PATH_TO_EMPTY_FILE, false);
+      const labelConfiguration = getLabelConfiguration("/path/to/empty/file.yml", false);
 
       expect(core.info).toHaveBeenCalledWith(`Getting labels configuration....`);
       expect(core.info).toHaveBeenCalledWith(`Custom label configuration is supported.`);
       expect(core.info).toHaveBeenCalledWith(
-        `Getting custom labels configuration from file '${PATH_TO_EMPTY_FILE}'...`
+        `Getting custom labels configuration from file '/path/to/empty/file.yml'...`
       );
       expect(core.info).toHaveBeenCalledWith("Checking if the labels configuration file is supported...");
       expect(core.info).toHaveBeenCalledWith(`Labels configuration file 'file.yml' is supported by action.`);
       expect(core.info).toHaveBeenCalledWith("Reading labels configuration from file...");
       expect(core.error).toHaveBeenCalledWith(
-        `The label configuration file '${PATH_TO_EMPTY_FILE}' does not contain any data.`
+        `The label configuration file '/path/to/empty/file.yml' does not contain any data.`
       );
       expect(core.warning).toHaveBeenCalledWith(
         "Custom labels configuration file is not supported by an action. DEFAULT labels configuration will be used."
@@ -90,18 +86,18 @@ describe("Jest Test Results Action", () => {
     });
 
     test("should return configuration build of default and custom configuration, when set custom configuration file", () => {
-      const labelConfiguration = getLabelConfiguration(PATH_TO_CORRECT_FILE, false);
+      const labelConfiguration = getLabelConfiguration("/path/to/correct/file.yml", false);
 
       expect(core.info).toHaveBeenCalledWith(`Getting labels configuration....`);
       expect(core.info).toHaveBeenCalledWith(`Custom label configuration is supported.`);
       expect(core.info).toHaveBeenCalledWith(
-        `Getting custom labels configuration from file '${PATH_TO_CORRECT_FILE}'...`
+        `Getting custom labels configuration from file '/path/to/correct/file.yml'...`
       );
       expect(core.info).toHaveBeenCalledWith("Checking if the labels configuration file is supported...");
       expect(core.info).toHaveBeenCalledWith(`Labels configuration file 'file.yml' is supported by action.`);
       expect(core.info).toHaveBeenCalledWith("Reading labels configuration from file...");
       expect(core.info).toHaveBeenCalledWith(
-        `The label configuration file '${PATH_TO_CORRECT_FILE}' has been loaded successfully.`
+        `The label configuration file '/path/to/correct/file.yml' has been loaded successfully.`
       );
       expect(core.info).toHaveBeenCalledWith("Checking custom configuration correctness...");
       expect(core.info).toHaveBeenCalledWith("Custom configuration is correct.");
@@ -115,18 +111,18 @@ describe("Jest Test Results Action", () => {
     });
 
     test("should return custom configuration, when set custom configuration file and default configuration is disabled", () => {
-      const labelConfiguration = getLabelConfiguration(PATH_TO_CORRECT_FILE, true);
+      const labelConfiguration = getLabelConfiguration("/path/to/correct/file.yml", true);
 
       expect(core.info).toHaveBeenCalledWith(`Getting labels configuration....`);
       expect(core.info).toHaveBeenCalledWith(`Custom label configuration is supported.`);
       expect(core.info).toHaveBeenCalledWith(
-        `Getting custom labels configuration from file '${PATH_TO_CORRECT_FILE}'...`
+        `Getting custom labels configuration from file '/path/to/correct/file.yml'...`
       );
       expect(core.info).toHaveBeenCalledWith("Checking if the labels configuration file is supported...");
       expect(core.info).toHaveBeenCalledWith(`Labels configuration file 'file.yml' is supported by action.`);
       expect(core.info).toHaveBeenCalledWith("Reading labels configuration from file...");
       expect(core.info).toHaveBeenCalledWith(
-        `The label configuration file '${PATH_TO_CORRECT_FILE}' has been loaded successfully.`
+        `The label configuration file '/path/to/correct/file.yml' has been loaded successfully.`
       );
       expect(core.info).toHaveBeenCalledWith("Checking custom configuration correctness...");
       expect(core.info).toHaveBeenCalledWith("Custom configuration is correct.");
@@ -138,18 +134,18 @@ describe("Jest Test Results Action", () => {
     });
 
     test("should return empty config, when set custom configuration file not exist and default configuration is disabled", () => {
-      const labelConfiguration = getLabelConfiguration(PATH_TO_NOT_EXISTED_FILE, true);
+      const labelConfiguration = getLabelConfiguration("/path/to/not/existed/file.yml", true);
 
       expect(core.info).toHaveBeenCalledWith(`Getting labels configuration....`);
       expect(core.info).toHaveBeenCalledWith(`Custom label configuration is supported.`);
       expect(core.info).toHaveBeenCalledWith(
-        `Getting custom labels configuration from file '${PATH_TO_NOT_EXISTED_FILE}'...`
+        `Getting custom labels configuration from file '/path/to/not/existed/file.yml'...`
       );
       expect(core.info).toHaveBeenCalledWith("Checking if the labels configuration file is supported...");
       expect(core.info).toHaveBeenCalledWith(`Labels configuration file 'file.yml' is supported by action.`);
       expect(core.info).toHaveBeenCalledWith("Reading labels configuration from file...");
       expect(core.error).toHaveBeenCalledWith(
-        `The label configuration file '${PATH_TO_NOT_EXISTED_FILE}' does not exists.`
+        `The label configuration file '/path/to/not/existed/file.yml' does not exists.`
       );
       expect(core.setFailed).toHaveBeenCalledWith(
         "Custom labels configuration file is not supported by an action and DEFAULT configuration is disabled. No label will be changed."
