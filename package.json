@@ -25,7 +25,7 @@
     "@types/jest": "^29.2.3",
     "@types/js-yaml": "^4.0.5",
     "@types/lodash-es": "^4.17.6",
-    "@types/minimatch": "^5.1.0",
+    "@types/minimatch": "^5.1.2",
     "@types/node": "^18.7.13",
     "@typescript-eslint/parser": "^5.35.1",
     "@vercel/ncc": "^0.34.0",
